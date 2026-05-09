@@ -6,7 +6,9 @@ BIN := sea64
 STD := -std=c2x
 WARN := -Wall -Wextra -Wpedantic
 
-INCLUDES := -Iinclude/bus/ -Iinclude/chips/ -Iinclude/debug/
+INCLUDES := $(addprefix -I,$(shell find include -type d))
+
+LIBS := `pkg-config --cflags --libs sdl3`
 
 # Recursively grab all source files
 SRCS := $(shell find src -name '*.c')
@@ -17,12 +19,12 @@ all: production
 
 # Production build (debug + sanitizers)
 production: CFLAGS := -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer $(STD) $(WARN) $(INCLUDES)
-production: LDFLAGS := -ljansson -fsanitize=address,undefined
+production: LDFLAGS := -ljansson -fsanitize=address,undefined $(LIBS)
 production: $(BIN)
 
 # Release build (fast)
-release: CFLAGS := -O3 -march=native -flto -fno-plt -fomit-frame-pointer -DNDEBUG $(STD) $(WARN) $(INCLUDES)
-release: LDFLAGS := -ljansson -flto
+release: CFLAGS := -O3 -march=native -flto -fno-plt -fomit-frame-pointer -DNDEBUG $(STD) $(WARN) $(INCLUDES) 
+release: LDFLAGS := -ljansson -flto $(LIBS)
 release: $(BIN)
 
 # Link

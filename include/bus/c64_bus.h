@@ -12,6 +12,10 @@ typedef struct c64_t {
   m65xx_t *m6510;
   vic_ii_t *vic;
 
+  // RAM Structure:
+  // 
+  // BASIC RAM 
+  // Usable RAM
   uint8_t ram[0x10000];
 
   uint8_t kernal_rom[0x1FFF];

@@ -50,3 +50,5 @@ uint8_t vic_get_dbus(const vic_ii_t* vic);
 
 void vic_pin_on(vic_ii_t *vic, uint64_t bit);
 void vic_pin_off(vic_ii_t *vic, uint64_t bit);
+
+void vic_ii_bank_switching(vic_ii_t *vic);
