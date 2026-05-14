@@ -98,3 +98,6 @@ typedef struct vic_ii_t {
   vic_timing_t *vic_time;
 
 } vic_ii_t;
+
+
+void vic_ii_init(vic_ii_t *vic);

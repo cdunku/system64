@@ -6,11 +6,14 @@
 
 #include "m6510.h"
 #include "vic-ii.h"
+#include "display.h"
 
 typedef struct c64_t {
 
   m65xx_t *m6510;
   vic_ii_t *vic;
+
+  host_display_t *display;
 
   // RAM Structure:
   // 

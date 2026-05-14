@@ -3,28 +3,24 @@
 
 #include "display.h"
 
-SDL_Color c64_colors[16] = {
-  { 0x00, 0x00, 0x00, 0xFF }, // Black
-  { 0xFF, 0xFF, 0xFF, 0xFF }, // White
-  { 0x88, 0x00, 0x00, 0xFF }, // Red
-  { 0xAA, 0xFF, 0xEE, 0xFF }, // Cyan
-  { 0xCC, 0x44, 0xCC, 0xFF }, // Violet/purple
-  { 0x00, 0xCC, 0x55, 0xFF }, // Green
-  { 0x00, 0x00, 0xAA, 0xFF }, // Blue
-  { 0xEE, 0xEE, 0x77, 0xFF }, // Yellow
-  { 0xDD, 0x88, 0x55, 0xFF }, // Orange
-  { 0x66, 0x44, 0x00, 0xFF }, // Brown
-  { 0xFF, 0x77, 0x77, 0xFF }, // Light red 
-  { 0x33, 0x33, 0x33, 0xFF }, // Dark grey/grey 1
-  { 0x77, 0x77, 0x77, 0xFF }, // Grey 2
-  { 0xAA, 0xFF, 0x66, 0xFF }, // Light green 
-  { 0x00, 0x88, 0xFF, 0xFF }, // Light blue 
-  { 0xBB, 0xBB, 0xBB, 0xFF }, // Light grey/grey 3
-};
 
-bool host_create_window_renderer(host_display_t *disp, int width, int height) {
+bool host_create_window_renderer(host_display_t *disp, const char *title, int width, int height) {
 
-  disp->window = SDL_CreateWindow("Sea64", width, height, 0);
+  SDL_Rect disp_bounds;
+
+  if(!SDL_GetDisplayBounds(SDL_GetPrimaryDisplay(), &disp_bounds)) {
+    fprintf(stderr, "Error: failed to get SDL3 display bounds (%s)\n", SDL_GetError());
+    return false;
+  }
+
+  disp->window_width = disp_bounds.w * 0.5;
+  disp->window_height = disp_bounds.h * 0.5;
+
+  disp->internal_width = width;
+  disp->internal_height = height;
+
+
+  disp->window = SDL_CreateWindow(title, disp->window_width, disp->window_height, SDL_WINDOW_RESIZABLE);
   if(disp->window == NULL) {
     fprintf(stderr, "Error: failed to create SDL3 window (%s)\n", SDL_GetError());
     return false;
@@ -36,7 +32,7 @@ bool host_create_window_renderer(host_display_t *disp, int width, int height) {
     return false;
   }
 
-  if(!SDL_SetRenderLogicalPresentation(disp->renderer, width, height, SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
+  if(!SDL_SetRenderLogicalPresentation(disp->renderer, disp->internal_width, disp->internal_height, SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
     fprintf(stderr, "Error: failed to set SDL3 logical presentation (%s)\n", SDL_GetError());
     return false;
   }
@@ -47,14 +43,14 @@ bool host_create_window_renderer(host_display_t *disp, int width, int height) {
 
 bool host_create_palette(host_display_t *disp) {
 
-  disp->palette = SDL_CreatePalette(16);
+  disp->palette = SDL_CreatePalette(disp->colors_amount);
 
   if(disp->palette == NULL) {
     fprintf(stderr, "Error: failed to create SDL3 palette (%s)\n", SDL_GetError());
     return false;
   }
 
-  if(!SDL_SetPaletteColors(disp->palette, c64_colors, 0, 16)) {
+  if(!SDL_SetPaletteColors(disp->palette, disp->palette_colors, 0, disp->colors_amount)) {
     fprintf(stderr, "Error: failed to set SDL3 palette (%s)\n", SDL_GetError());
     return false;
   }
@@ -64,16 +60,16 @@ bool host_create_palette(host_display_t *disp) {
 
 
 
-bool host_create_surface(host_display_t *disp, int width, int height) {
+bool host_create_surface(host_display_t *disp) {
 
-  disp->surface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_INDEX8);
+  disp->surface = SDL_CreateSurface(disp->internal_width, disp->internal_height, disp->pixel_format);
 
   if(disp->surface == NULL) {
     fprintf(stderr, "Error: failed to create SDL3 surface (%s)\n", SDL_GetError());
     return false;
   }
   
-  if(host_create_palette(disp) == false) { return false; }
+  if(!host_create_palette(disp)) { return false; }
 
   if(!SDL_SetSurfacePalette(disp->surface, disp->palette)) {
     fprintf(stderr, "Error: failed to set SDL3 surface (%s)\n", SDL_GetError());
@@ -83,16 +79,16 @@ bool host_create_surface(host_display_t *disp, int width, int height) {
   return true;
 }
 
-bool host_texture_create(host_display_t* disp, int width, int height) {
+bool host_texture_create(host_display_t* disp) {
   
-  disp->texture = SDL_CreateTexture(disp->renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+  disp->texture = SDL_CreateTexture(disp->renderer, disp->texture_format, disp->access, disp->internal_width, disp->internal_height);
 
   if(disp->texture == NULL) {
     fprintf(stderr, "Error: failed to create SDL3 texture (%s)\n", SDL_GetError());
     return false;
   } 
 
-  if(!SDL_SetTextureScaleMode(disp->texture, SDL_SCALEMODE_NEAREST)) { 
+  if(!SDL_SetTextureScaleMode(disp->texture, disp->filter_mode)) { 
     fprintf(stderr, "Error: failed to set SDL3 textures to scale mode (%s)\n", SDL_GetError());
     return false; 
   };
@@ -104,24 +100,38 @@ bool host_texture_create(host_display_t* disp, int width, int height) {
 // Initializes the host display, and checks the creation of each component step-by-step.
 // This can be crucial for debugging later, 
 // each if-statement for checking the state has a special error message with SDL_GetError() called.
-bool init_host_display(host_display_t *disp, int width, int height) {
+bool init_host_display(host_display_t *disp, const char *title, int width, int height) {
 
   if(!SDL_Init(SDL_INIT_VIDEO)) {
     fprintf(stderr, "Error: failed to initialise SDL3 display (%s)\n", SDL_GetError());
     return false;
   }
 
-  if(host_create_window_renderer(disp, width, height) == false) { return false; }
-  if(host_create_surface(disp, width, height) == false) { return false; };
-  if(host_texture_create(disp, width, height) == false) { return false; }
+  if(host_create_window_renderer(disp, title, width, height) == false) { return false; }
+  if(host_create_surface(disp) == false) { return false; };
+  if(host_texture_create(disp) == false) { return false; }
 
   return true;
 }
 
 
-void render_host_display(host_display_t *disp);
-void update_host_display(host_display_t *disp, void *disp_buf, SDL_PixelFormat pix_form) {
+void render_host_display(host_display_t *disp) {
+  
+  SDL_RenderClear(disp->renderer);
+  SDL_RenderTexture(disp->renderer, disp->texture, NULL, NULL);
+  SDL_RenderPresent(disp->renderer);
+}
+void update_host_display(host_display_t *disp, void *disp_buf) {
 
+  int bytes_per_pixel = SDL_BYTESPERPIXEL(disp->pixel_format);
+
+  memcpy(disp->surface->pixels, disp_buf, disp->internal_width * disp->internal_height * bytes_per_pixel);
+
+  SDL_Surface *locked = NULL; 
+
+  SDL_LockTextureToSurface(disp->texture, NULL, &locked);
+  SDL_BlitSurface(disp->surface, NULL, locked, NULL);
+  SDL_UnlockTexture(disp->texture);
 }
 
 // Destroy all objects related to the display

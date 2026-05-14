@@ -3,7 +3,7 @@
 #include "vic-ii.h"
 #include "m6510.h"
 
-void vic_initialise(vic_ii_t *vic) {
+void vic_ii_init(vic_ii_t *vic) {
 
   if(vic->vic_time->std == VIC_PAL) {
     vic->vic_time->cycle_per_line = 63;
