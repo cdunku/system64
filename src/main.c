@@ -245,11 +245,10 @@ static int load_file(m65xx_t* const m, const char *file, uint16_t addr) {
 }
 
 static int allsuiteasm(m65xx_t* const m) {
-  memset(m->ram, 0, 0x10000);
-
-  load_file(m, "tests/AllSuiteA.bin", 0x4000);
 
   m65xx_init(m);
+
+  load_file(m, "tests/AllSuiteA.bin", 0x4000);
 
   while(true) {
     do {  
@@ -275,11 +274,10 @@ static int allsuiteasm(m65xx_t* const m) {
   return 0;
 }
 static int m6502_functional_test(m65xx_t* const m) {
-  memset(m->ram, 0, 0x10000);
+  m65xx_init(m);
 
   load_file(m, "tests/6502_functional_test.bin", 0x0);
 
-  m65xx_init(m);
 
   m6510_set_abus(m, m->pc = 0x400);
 
@@ -310,10 +308,9 @@ static int m6502_functional_test(m65xx_t* const m) {
 }
 
 static int m6502_timing_test(m65xx_t* const m) {
-  memset(m->ram, 0, 0x10000); 
+  m65xx_init(m); 
   load_file(m, "tests/timingtest-1.bin", 0x1000);
 
-  m65xx_init(m);  
 
   m6510_set_abus(m, m->pc = 0x1000);
 
@@ -338,10 +335,9 @@ static int m6502_timing_test(m65xx_t* const m) {
   return 0; 
 }
 static int m6502_decimal_test(m65xx_t* const m) {
-  memset(m->ram, 0, 0x10000);  
+  m65xx_init(m);  
   load_file(m, "tests/6502_decimal_test.bin", 0x200);
 
-  m65xx_init(m);  
   m6510_set_abus(m, m->pc = 0x200);  
 
     while(true) {
@@ -375,10 +371,9 @@ void m6502_interrupt_handler(m65xx_t* const m) {
   }
 }
 static int m6502_interrupt_test(m65xx_t* const m) {
-  memset(m->ram, 0, 0x10000);
+  m65xx_init(m);
   load_file(m, "tests/6502_interrupt_test.bin", 0xA);
 
-  m65xx_init(m);
 
   uint16_t pc_ = 0;
   m6510_set_abus(m, m->pc = 0x400);

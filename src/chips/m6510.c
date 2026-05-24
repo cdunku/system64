@@ -2230,17 +2230,14 @@ m65xx_opcodes_t m6502_opcode_table[0x103] = {
 }; 
 
 void m65xx_init(m65xx_t* const m) {
-  m->m6510_pins = 0;
+  
+  memset(m, 0, sizeof(*m));
+
   m->m6510_pins |= (M6510_RW | M6510_SYNC);
   m->a = m->x = m->y = m->p = m->tcu = 0;
   m->s = 0xFD;
   m->p |= 0x20;
   m->ir = 0x00; 
-  m->pc = m->ad = 0;
-  m->bra = 0;
-
-  m->cpu_clock = 0;
-  m->nmi_edge = m->nmi_occurred = m->irq_occurred = 0;
 }
 
 void m65xx_tick(m65xx_t* const m) {

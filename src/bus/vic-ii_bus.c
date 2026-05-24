@@ -16,3 +16,43 @@ uint8_t vic_get_dbus(const vic_ii_t* vic) {
 
 void vic_pin_on(vic_ii_t *vic, uint64_t bit) { pin_on(&vic->vic_pins, bit); }
 void vic_pin_off(vic_ii_t *vic, uint64_t bit) { pin_off(&vic->vic_pins, bit); }
+
+
+void vic_set_reg(vic_ii_t *vic, uint16_t addr, uint8_t val) {
+  uint8_t r = (addr - 0xD000) & 0x3F;
+  switch (r) {
+    case INTERRUPT_LATCH: {
+      // Sets the corresponding flag inside the interrupt register. 
+      // In the original chip:
+      // 0 -> Sets the flag 
+      // 1 -> Clear the flag
+      //
+      // But instead we will just do it vice-versa for better readability.
+      vic->vic_reg[r] &= ~val;
+      break;
+    }
+    default: {
+      vic->vic_reg[r] = val;
+      break;
+    }
+  }
+}
+
+uint8_t set_vic_reg(vic_ii_t *vic, uint16_t addr) {
+  uint8_t r = (addr - 0xD000) & 0x3F;
+  switch (r) {
+    case SPRITE_DATA_COLLISION:
+    case SPRITE_SPRITE_COLLISION: {
+      uint8_t sprite_collision = vic->vic_reg[r];
+      vic->vic_reg[r] = 0;
+
+      return sprite_collision;
+    }
+
+    default: {
+      return vic->vic_reg[r];
+    }
+
+  }
+}
+
