@@ -95,6 +95,9 @@ typedef struct vic_ii_t {
   uint16_t x_pos, y_pos;
   uint16_t frame;
 
+  // Video buffer of the VIC-II
+  uint8_t video_buffer[320 * 200];
+
   vic_timing_t *vic_time;
 
 } vic_ii_t;

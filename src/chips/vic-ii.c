@@ -1,6 +1,9 @@
 #include <stdio.h>
 
+#include "vic-ii_bus.h"
 #include "vic-ii.h"
+
+
 #include "m6510.h"
 
 void vic_ii_init(vic_ii_t *vic) {
@@ -23,9 +26,12 @@ static inline void set_vic_reg(vic_ii_t *vic, uint16_t addr, uint8_t val) {
   switch (r) {
     case INTERRUPT_LATCH: {
       // Sets the corresponding flag inside the interrupt register. 
+      // In the original chip:
       // 0 -> Sets the flag 
       // 1 -> Clear the flag
-      vic->vic_reg[r] &= val;
+      //
+      // But instead we will just do it vice-versa for better readability.
+      vic->vic_reg[r] &= ~val;
       break;
     }
     default: {
@@ -56,9 +62,17 @@ static inline uint8_t get_vic_reg(vic_ii_t *vic, uint16_t addr) {
 
 void vic_tick(vic_ii_t *vic) {
 
-  if((vic->x_pos == 1 && vic->y_pos == 0) 
-    || vic->y_pos == vic_get_raster(vic)) {
-     set_vic_reg(vic, INTERRUPT_LATCH, ~(RASTER_INTERRUPT | INTERRUPT_REQUEST));
+  if(vic->x_pos == 1 || 
+     (vic->x_pos == 2 && vic->y_pos == 0)) {
+      vic->vic_reg[INTERRUPT_LATCH] |= RASTER_INTERRUPT;
+
+      if(vic->vic_reg[INTERRUPT_ENABLED] & RASTER_INTERRUPT) {
+        vic->vic_reg[INTERRUPT_LATCH] |= INTERRUPT_REQUEST;
+        vic_pin_on(vic, VIC_II_IRQ);
+      }
+      else {
+        set_vic_reg(vic, INTERRUPT_LATCH, INTERRUPT_REQUEST);
+      }
   }
 
   vic->x_pos++;
