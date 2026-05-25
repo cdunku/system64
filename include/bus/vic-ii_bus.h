@@ -42,6 +42,9 @@ static const uint64_t VIC_II_AEC  = PINMASK(VIC_II_AEC_PIN);
  *
  */
 
+void vic_write_color_ram(vic_ii_t *vic, uint16_t addr, uint8_t val);
+uint8_t vic_read_color_ram(vic_ii_t *vic, uint16_t addr);
+
 void vic_set_abus(vic_ii_t* vic, uint16_t addr);
 void vic_set_dbus(vic_ii_t* vic, uint8_t data);
 

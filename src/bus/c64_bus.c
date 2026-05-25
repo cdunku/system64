@@ -30,7 +30,7 @@ uint8_t c64_read(c64_t* c64, uint16_t addr) {
 
   }
   else if(0xDF00 <= addr && addr <= 0xDFFF) {
-
+    return vic_read_color_ram(c64->vic, addr);
   }
 }
 void c64_write(c64_t* c64, uint16_t addr, uint8_t data) {
@@ -53,7 +53,7 @@ void c64_write(c64_t* c64, uint16_t addr, uint8_t data) {
 
   }
   else if(0xDF00 <= addr && addr <= 0xDFFF) {
-
+    vic_write_color_ram(c64->vic, addr, data);
   }
 }
 

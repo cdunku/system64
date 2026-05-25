@@ -30,10 +30,6 @@ static inline uint16_t vic_get_raster(const vic_ii_t *vic) {
   return raster;
 }
 
-
-
-
-
 void vic_tick(vic_ii_t *vic) {
 
   if(vic->x_pos == 1 || 
