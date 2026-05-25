@@ -42,7 +42,6 @@ static const uint64_t VIC_II_AEC  = PINMASK(VIC_II_AEC_PIN);
  *
  */
 
-
 void vic_set_abus(vic_ii_t* vic, uint16_t addr);
 void vic_set_dbus(vic_ii_t* vic, uint8_t data);
 

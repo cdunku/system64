@@ -97,6 +97,7 @@ typedef struct vic_ii_t {
 
   // Video buffer of the VIC-II
   uint8_t video_buffer[320 * 200];
+  uint8_t color_ram[0x400];
 
   vic_timing_t *vic_time;
 
