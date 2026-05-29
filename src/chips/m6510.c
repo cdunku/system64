@@ -2229,7 +2229,7 @@ m65xx_opcodes_t m6502_opcode_table[0x103] = {
   [0x102] = { .mode = irq, .instr = impl },
 }; 
 
-void m65xx_init(m65xx_t* const m) {
+void m6510_init(m65xx_t* const m) {
   
   memset(m, 0, sizeof(*m));
 
@@ -2240,7 +2240,7 @@ void m65xx_init(m65xx_t* const m) {
   m->ir = 0x00; 
 }
 
-void m65xx_tick(m65xx_t* const m) {
+void m6510_tick(m65xx_t* const m) {
 
   /*
   if((m->m6510_pins & M6510_NMI) && !(m->nmi_edge)) { m->nmi_occurred = 1; }

@@ -14,12 +14,13 @@ typedef enum M6510_PINOUT {
   // control pins start AFTER DBUS
   M6510_RDY_PIN = 24,
   M6510_IRQ_PIN,
+  M6510_RW_PIN,
+  M6510_AEC_PIN,
+  
   M6510_NMI_PIN,
   M6510_SYNC_PIN,
   M6510_RES_PIN,
-  M6510_RW_PIN,
 
-  M6510_AEC_PIN,
   M6510_P0_PIN,
   M6510_P1_PIN,
   M6510_P2_PIN,
@@ -29,8 +30,6 @@ typedef enum M6510_PINOUT {
 
 } M6510_PINOUT;
 
-
-#define PINMASK(pin) (1ULL << (pin))
 
 /*
  *
@@ -45,7 +44,7 @@ static const uint64_t M6510_SYNC = PINMASK(M6510_SYNC_PIN);
 static const uint64_t M6510_RES  = PINMASK(M6510_RES_PIN);
 static const uint64_t M6510_RW   = PINMASK(M6510_RW_PIN);
 
-static const uint64_t M651_AEC  = PINMASK(M6510_AEC_PIN);
+static const uint64_t M6510_AEC  = PINMASK(M6510_AEC_PIN);
 static const uint64_t M6510_P0   = PINMASK(M6510_P0_PIN);
 static const uint64_t M6510_P1   = PINMASK(M6510_P1_PIN);
 static const uint64_t M6510_P2   = PINMASK(M6510_P2_PIN);

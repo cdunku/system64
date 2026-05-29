@@ -17,8 +17,11 @@ uint8_t c64_read(c64_t* c64, uint16_t addr) {
   else if(0xD400 <= addr && addr <= 0xD7FF) {
 
   }
-  else if(0xD800 <= addr && addr <= 0xD8FF) {
+  else if(0xD800 <= addr && addr <= 0xDBFF) {
+    uint8_t nibble = vic_read_color_ram(c64->vic, addr) & 0x0F;
+    vic_set_color_dbus(c64->vic, nibble);
 
+    return nibble |= 0xF0;
   }
   else if(0xDC00 <= addr && addr <= 0xDCFF) {
 
@@ -40,8 +43,9 @@ void c64_write(c64_t* c64, uint16_t addr, uint8_t data) {
   else if(0xD400 <= addr && addr <= 0xD7FF) {
 
   }
-  else if(0xD800 <= addr && addr <= 0xD8FF) {
-
+  else if(0xD800 <= addr && addr <= 0xDBFF) {
+    vic_set_color_dbus(c64->vic, data);
+    vic_write_color_ram(c64->vic, addr, data);
   }
   else if(0xDC00 <= addr && addr <= 0xDCFF) {
 

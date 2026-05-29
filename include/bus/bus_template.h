@@ -9,6 +9,8 @@
  *
  */
 
+#define PINMASK(pin) (1ULL << (pin))
+
 static inline uint16_t get_abus(uint64_t pins, uint64_t mask, unsigned shift) {
   return (uint16_t)((pins & mask) >> shift);
 }

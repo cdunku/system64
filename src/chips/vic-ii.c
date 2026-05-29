@@ -4,8 +4,8 @@
 #include "vic-ii_bus.h"
 #include "vic-ii.h"
 
-
 #include "m6510.h"
+#include "m6510_bus.h"
 
 void vic_ii_init(vic_ii_t *vic) {
 
@@ -30,7 +30,8 @@ static inline uint16_t vic_get_raster(const vic_ii_t *vic) {
   return raster;
 }
 
-void vic_tick(vic_ii_t *vic) {
+
+static inline void vic_tick(vic_ii_t *vic) {
 
   if(vic->x_pos == 1 || 
      (vic->x_pos == 2 && vic->y_pos == 0)) {
@@ -52,4 +53,18 @@ void vic_tick(vic_ii_t *vic) {
     vic->y_pos = 0;
     vic->frame++;
   }
-} 
+}
+
+void vic_ii_run(vic_ii_t *vic) {
+
+  vic_tick(vic); 
+
+  if(vic->vic_pins & VIC_II_CS) {
+    if(vic->vic_pins & VIC_II_RW) {
+      
+    }
+    else {
+
+    }
+  }
+}

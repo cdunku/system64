@@ -37,7 +37,7 @@ void c64_init_display(c64_t *c64) {
 
 void c64_init(c64_t *c64) {
 
-  m65xx_init(c64->m6510);
+  m6510_init(c64->m6510);
   vic_ii_init(c64->vic);
 
   c64_init_display(c64);
@@ -49,7 +49,6 @@ void c64_init(c64_t *c64) {
 
   c64->main_clock = 0;
 
-  // color_ram
 }
 
 void c64_run(c64_t* c64) {
@@ -65,6 +64,10 @@ void c64_run(c64_t* c64) {
       if(event.type == SDL_EVENT_QUIT) { running = false; }
     }
   }
+
+  m6510_tick(c64->m6510);
+
+  vic_ii_run(c64->vic);
 
   return;
 }

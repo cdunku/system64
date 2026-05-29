@@ -62,7 +62,7 @@ static int m65xx_harte_tests(m65xx_t* const m, const char *file) {
     json_t *initial = json_object_get(test, "initial");
     json_t* final = json_object_get(test, "final");
 
-    m65xx_init(m);
+    m6510_init(m);
 
     m->pc = json_integer_value(json_object_get(initial, "pc"));
     m->a = json_integer_value(json_object_get(initial, "a"));
@@ -125,7 +125,7 @@ static int m65xx_harte_tests(m65xx_t* const m, const char *file) {
       // Internally this transitions through Φ1/Φ2,
       // and updates address, M6510_RW, and internal state.e.
 
-      m65xx_tick(m);
+      m6510_tick(m);
 
       strncpy(cycle[k].rw, (m->m6510_pins & M6510_RW) ? "read" : "write", 6);
 
@@ -246,7 +246,7 @@ static int load_file(m65xx_t* const m, const char *file, uint16_t addr) {
 
 static int allsuiteasm(m65xx_t* const m) {
 
-  m65xx_init(m);
+  m6510_init(m);
 
   load_file(m, "tests/AllSuiteA.bin", 0x4000);
 
@@ -255,7 +255,7 @@ static int allsuiteasm(m65xx_t* const m) {
       if(m->m6510_pins & M6510_RW) {
         m6510_set_dbus(m, m->ram[m6510_get_abus(m)]);
       }
-      m65xx_tick(m);
+      m6510_tick(m);
       if(!(m->m6510_pins & M6510_RW)) {
         m->ram[m6510_get_abus(m)] = m6510_get_dbus(m);
       }
@@ -274,7 +274,7 @@ static int allsuiteasm(m65xx_t* const m) {
   return 0;
 }
 static int m6502_functional_test(m65xx_t* const m) {
-  m65xx_init(m);
+  m6510_init(m);
 
   load_file(m, "tests/6502_functional_test.bin", 0x0);
 
@@ -288,7 +288,7 @@ static int m6502_functional_test(m65xx_t* const m) {
       if(m->m6510_pins & M6510_RW) {
         m6510_set_dbus(m, m->ram[m6510_get_abus(m)]);
       }
-      m65xx_tick(m);
+      m6510_tick(m);
       if(!(m->m6510_pins & M6510_RW)) {
         m->ram[m6510_get_abus(m)] = m6510_get_dbus(m);
       }
@@ -308,7 +308,7 @@ static int m6502_functional_test(m65xx_t* const m) {
 }
 
 static int m6502_timing_test(m65xx_t* const m) {
-  m65xx_init(m); 
+  m6510_init(m); 
   load_file(m, "tests/timingtest-1.bin", 0x1000);
 
 
@@ -321,7 +321,7 @@ static int m6502_timing_test(m65xx_t* const m) {
       if(m->m6510_pins & M6510_RW) {
         m6510_set_dbus(m, m->ram[m6510_get_abus(m)]);
       }
-      m65xx_tick(m);
+      m6510_tick(m);
       if(!(m->m6510_pins & M6510_RW)) {
         m->ram[m6510_get_abus(m)] = m6510_get_dbus(m);
       }
@@ -335,7 +335,7 @@ static int m6502_timing_test(m65xx_t* const m) {
   return 0; 
 }
 static int m6502_decimal_test(m65xx_t* const m) {
-  m65xx_init(m);  
+  m6510_init(m);  
   load_file(m, "tests/6502_decimal_test.bin", 0x200);
 
   m6510_set_abus(m, m->pc = 0x200);  
@@ -345,7 +345,7 @@ static int m6502_decimal_test(m65xx_t* const m) {
       if(m->m6510_pins & M6510_RW) {
         m6510_set_dbus(m, m->ram[m6510_get_abus(m)]);
       }
-      m65xx_tick(m);
+      m6510_tick(m);
       if(!(m->m6510_pins & M6510_RW)) {
         m->ram[m6510_get_abus(m)] = m6510_get_dbus(m);
       }
@@ -371,7 +371,7 @@ void m6502_interrupt_handler(m65xx_t* const m) {
   }
 }
 static int m6502_interrupt_test(m65xx_t* const m) {
-  m65xx_init(m);
+  m6510_init(m);
   load_file(m, "tests/6502_interrupt_test.bin", 0xA);
 
 
@@ -385,7 +385,7 @@ static int m6502_interrupt_test(m65xx_t* const m) {
       if(m->m6510_pins & M6510_RW) {
         m6510_set_dbus(m, m->ram[m6510_get_abus(m)]);
       }
-      m65xx_tick(m);
+      m6510_tick(m);
       if(!(m->m6510_pins & M6510_RW)) {
         m->ram[m6510_get_abus(m)] = m6510_get_dbus(m);
       }
