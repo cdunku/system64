@@ -27,6 +27,9 @@ typedef struct {
 
   // nmi_edge holds the edge case value, nmi_occurred executes a non-maskable interrupt.
   bool nmi_edge, nmi_occurred, irq_occurred;
+
+
+  bool cpu_freeze, cpu_instr_done;
 } m65xx_t;
 
 typedef struct { void (*mode)(m65xx_t*); void (*instr)(m65xx_t*); } m65xx_opcodes_t;

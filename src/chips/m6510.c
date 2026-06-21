@@ -30,6 +30,7 @@ static inline void set_p(m65xx_t* const m, uint8_t data) {
 }
 
 static inline void m6510_fetch(m65xx_t* const m) {
+  m->cpu_instr_done = 1;
   m6510_set_abus(m, m->pc);
   m6510_pin_on(m, M6510_SYNC);
 }
@@ -2242,7 +2243,6 @@ void m6510_init(m65xx_t* const m) {
 
 void m6510_tick(m65xx_t* const m) {
 
-  /*
   if((m->m6510_pins & M6510_NMI) && !(m->nmi_edge)) { m->nmi_occurred = 1; }
   m->nmi_edge = m->m6510_pins & M6510_NMI; // Updates if a edge case has occured
 
@@ -2252,11 +2252,11 @@ void m6510_tick(m65xx_t* const m) {
   if((m->m6510_pins & (M6510_RW | M6510_RDY)) == (M6510_RW | M6510_RDY)) {
 
   }
-  */
 
   if(m->m6510_pins & M6510_SYNC) {
     m->ir = m6510_get_dbus(m);
     m6510_pin_off(m, M6510_SYNC);
+    m->cpu_instr_done = 0;
 
     if(m->nmi_occurred) {
       m->ir = M6510_NMI_OPCODE;

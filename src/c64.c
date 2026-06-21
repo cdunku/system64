@@ -40,15 +40,48 @@ void c64_init(c64_t *c64) {
   m6510_init(c64->m6510);
   vic_ii_init(c64->vic);
 
+  memset(c64, 0, sizeof(*c64));
+
+  c64->c64_pins = c64->m6510->m6510_pins;
+
   c64_init_display(c64);
+}
 
-  memset(c64->ram, 0, 0x10000);
-  memset(c64->kernal_rom, 0, 0x1FFF);
-  memset(c64->basic_rom, 0, 0x1FFF); 
-  memset(c64->char_rom, 0, 0xFFF);
+void c64_tick(c64_t* c64) {
+  m65xx_t *c = c64->m6510;
+  vic_ii_t *v = c64->vic; 
 
-  c64->main_clock = 0;
+  uint8_t cycles_till_cpu_freeze = 0;
 
+  if(c->cpu_freeze == false) {
+    c->m6510_pins = c64->c64_pins;
+    m6510_tick(c);
+  }
+
+  const uint16_t main_address = m6510_get_abus(c); 
+
+  // Manipulated by other chips that have access to the main bus as well. 
+  c64->c64_pins = c->m6510_pins & ~(M6510_RDY | M6510_AEC | M6510_NMI | M6510_IRQ);
+
+  v->vic_pins = c64->c64_pins & VIC_II_PINOUT_MASK;
+  vic_ii_run(v);
+
+  if((v->vic_pins & VIC_II_BA))  {
+    if(cycles_till_cpu_freeze < 3) { cycles_till_cpu_freeze++; }
+    if (c->cpu_instr_done == true || cycles_till_cpu_freeze == 3) {
+      
+      m6510_pin_off(c, M6510_RDY);
+      c->cpu_freeze = 1;
+      cycles_till_cpu_freeze = 0;
+    }
+  }
+  else {
+    m6510_pin_on(c, M6510_RDY);
+    c->cpu_freeze = 0;
+    cycles_till_cpu_freeze = 0;
+  }
+
+  c64->master_clock++;
 }
 
 void c64_run(c64_t* c64) {
@@ -65,9 +98,6 @@ void c64_run(c64_t* c64) {
     }
   }
 
-  m6510_tick(c64->m6510);
-
-  vic_ii_run(c64->vic);
 
   return;
 }

@@ -9,7 +9,7 @@
 *
 */
 
-
+/*
 uint8_t c64_read(c64_t* c64, uint16_t addr) {
   if(0xD000 <= addr && addr <= 0xD3FF) {
     return vic_get_reg(c64->vic, addr);
@@ -60,4 +60,4 @@ void c64_write(c64_t* c64, uint16_t addr, uint8_t data) {
     vic_write_color_ram(c64->vic, addr, data);
   }
 }
-
+*/

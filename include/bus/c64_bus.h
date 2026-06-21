@@ -8,12 +8,18 @@
 #include "vic-ii.h"
 #include "display.h"
 
+#include "m6510_bus.h"
+#include "vic-ii_bus.h"
+
 typedef struct c64_t {
 
   m65xx_t *m6510;
   vic_ii_t *vic;
 
   host_display_t *display;
+
+
+  uint64_t c64_pins;
 
   // RAM Structure:
   // 
@@ -25,7 +31,7 @@ typedef struct c64_t {
   uint8_t basic_rom[0x1FFF];
   uint8_t char_rom[0xFFF];
 
-  uint64_t main_clock;
+  uint64_t master_clock;
 } c64_t;
 
 

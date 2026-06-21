@@ -93,6 +93,7 @@ typedef struct vic_ii_t {
   uint8_t vic_reg[0x40];
 
   uint16_t x_pos, y_pos;
+  uint16_t raster_compare;
   uint16_t frame;
 
   // Video buffer of the VIC-II

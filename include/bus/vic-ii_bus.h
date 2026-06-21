@@ -23,7 +23,7 @@ typedef enum VIC_II_PINOUT {
 
 } VIC_II_PINOUT;
 
-#define VIC_II_PINOUT_MASK ~(1ULL << 28) 
+#define VIC_II_PINOUT_MASK ~(1ULL << 30) 
 
 /* 
  *
