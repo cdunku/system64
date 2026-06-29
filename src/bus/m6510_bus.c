@@ -47,7 +47,7 @@ void m6510_check_io_requests(m65xx_t* const m) {
       // The left side of "|" calculates the output requests of the IO and sets it accordingly,
       // while on the other hand the right side preserves and/or sets the input requests.
 
-      p->active_lines_out = (p->out_or & p->io_ddr) | (p->active_lines_out | ~p->io_ddr);
+      p->active_lines_out = (p->out_or & p->io_ddr) | (p->active_lines_out & ~p->io_ddr);
 
       p->out_extern_device((p->out_or & p->io_ddr) | (USED_IO_PINS_MASK & ~p->io_ddr), p->user_data);
 
