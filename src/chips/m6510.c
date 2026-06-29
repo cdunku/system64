@@ -2248,11 +2248,6 @@ void m6510_tick(m65xx_t* const m) {
 
   if((m->m6510_pins & M6510_IRQ) && !(m->p & IDF)) { m->irq_occurred = 1; } else { m->irq_occurred = 0; }
 
-  // M6510_RDY can be only checked during a READ
-  if((m->m6510_pins & (M6510_RW | M6510_RDY)) == (M6510_RW | M6510_RDY)) {
-
-  }
-
   if(m->m6510_pins & M6510_SYNC) {
     m->ir = m6510_get_dbus(m);
     m6510_pin_off(m, M6510_SYNC);

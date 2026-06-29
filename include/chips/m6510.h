@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "m6510_bus.h"
+
+typedef struct m6510_port m6510_port;
+
 static const uint8_t NF  = (1 << 7);
 static const uint8_t VF  = (1 << 6);
 static const uint8_t BF  = (1 << 4);
@@ -15,7 +19,7 @@ static const uint16_t M6510_RES_OPCODE = 0x100;
 static const uint16_t M6510_NMI_OPCODE = 0x101;
 static const uint16_t M6510_IRQ_OPCODE = 0x102;
 
-typedef struct {
+typedef struct m65xx_t {
   uint8_t ram[0x10000];
   uint64_t m6510_pins;
   uint8_t a, x, y, s, p, tcu;
@@ -28,8 +32,10 @@ typedef struct {
   // nmi_edge holds the edge case value, nmi_occurred executes a non-maskable interrupt.
   bool nmi_edge, nmi_occurred, irq_occurred;
 
-
   bool cpu_freeze, cpu_instr_done;
+
+  m6510_port_t *port;
+
 } m65xx_t;
 
 typedef struct { void (*mode)(m65xx_t*); void (*instr)(m65xx_t*); } m65xx_opcodes_t;

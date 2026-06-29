@@ -25,70 +25,11 @@ void vic_set_color_dbus(vic_ii_t* vic, uint8_t data) {
 void vic_pin_on(vic_ii_t *vic, uint64_t bit) { pin_on(&vic->vic_pins, bit); }
 void vic_pin_off(vic_ii_t *vic, uint64_t bit) { pin_off(&vic->vic_pins, bit); }
 
-void vic_set_reg(vic_ii_t *vic, uint16_t addr, uint8_t val) {
-  uint8_t r = (addr - 0xD000) & 0x3F;
-  switch (r) {
-    case CONTROL_REG1: {
-      vic->vic_reg[r] = val;
 
-      vic->raster_compare = (vic->raster_compare & 0xFF) | (val & 0x80) << 1;
-      break;
-    }
-    case RASTER_COUNTER: {
-      vic->vic_reg[r] = val;
-
-      vic->raster_compare = (vic->raster_compare & 0x100) | val;
-      break;
-    }
-    case INTERRUPT_LATCH: {
-      // Sets the corresponding flag inside the interrupt register. 
-      // In the original chip:
-      // 0 -> Sets the flag 
-      // 1 -> Clear the flag
-      //
-      // But instead we will just do it vice-versa for better readability.
-      vic->vic_reg[r] &= ~val;
-      break;
-    }
-    case INTERRUPT_ENABLED: {
-      vic->vic_reg[r] |= 0xF0;
-
-
-    }
-    default: {
-      vic->vic_reg[r] = val;
-      break;
-    }
-  }
-}
-
-uint8_t vic_get_reg(vic_ii_t *vic, uint16_t addr) {
-  uint8_t r = (addr - 0xD000) & 0x3F;
-  switch (r) {
-    case CONTROL_REG1: {
-      return (vic->vic_reg[r] & 0x7F) | ((vic->y_pos & 0x100) >> 1);
-    }
-    case RASTER_COUNTER: {
-      return (vic->y_pos & 0xFF);
-    }
-    case SPRITE_DATA_COLLISION:
-    case SPRITE_SPRITE_COLLISION: {
-      uint8_t sprite_collision = vic->vic_reg[r];
-      vic->vic_reg[r] = 0;
-
-      return sprite_collision;
-    }
-
-    default: {
-      return vic->vic_reg[r];
-    }
-
-  }
-}
 
 void vic_write_color_ram(vic_ii_t *vic, uint16_t addr, uint8_t val) {
-  vic->color_ram[addr - 0xD800] = val & 0x0F;
+  vic->color_ram[addr - 0xD800] = (val & 0x0F) | 0xF0;
 }
 uint8_t vic_read_color_ram(vic_ii_t *vic, uint16_t addr) {
-  return vic->color_ram[addr - 0xD800] & 0x0F;
+  return (vic->color_ram[addr - 0xD800] & 0x0F) | 0xF0;
 }

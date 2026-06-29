@@ -60,5 +60,4 @@ void vic_pin_off(vic_ii_t *vic, uint64_t bit);
 
 void vic_ii_bank_switching(vic_ii_t *vic);
 
-void vic_set_reg(vic_ii_t *vic, uint16_t addr, uint8_t val);
-uint8_t vic_get_reg(vic_ii_t *vic, uint16_t addr);
+
