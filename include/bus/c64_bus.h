@@ -32,6 +32,8 @@ typedef struct c64_t {
   uint8_t char_rom[0xFFF];
 
   uint64_t master_clock;
+
+  uint8_t cycles_till_cpu_freeze;
 } c64_t;
 
 

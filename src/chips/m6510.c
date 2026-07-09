@@ -31,6 +31,7 @@ static inline void set_p(m65xx_t* const m, uint8_t data) {
 
 static inline void m6510_fetch(m65xx_t* const m) {
   m->cpu_instr_done = 1;
+  
   m6510_set_abus(m, m->pc);
   m6510_pin_on(m, M6510_SYNC);
 }
@@ -47,6 +48,8 @@ static inline void impl(m65xx_t* const m) {
   switch (m->tcu) {
     case 1: {
       m6510_set_abus(m, m->pc);
+
+      m->interrupt_poll = true;
       break;
     }
     case 2: { 
@@ -66,6 +69,8 @@ static inline void accu(m65xx_t* const m) {
   switch (m->tcu) {
     case 1: {
       m6510_set_abus(m, m->pc);
+
+      m->interrupt_poll = true;
       break;
     }
     case 2: {
@@ -87,6 +92,8 @@ static inline void imme(m65xx_t* const m) {
   switch (m->tcu) {
     case 1: {
       m6510_set_abus(m, m->pc++);
+
+      m->interrupt_poll = true;
       break;
     }
     case 2: {
@@ -108,18 +115,29 @@ static inline void rela(m65xx_t* const m) {
       m6502_opcode_table[m->ir].instr(m);
       m6510_set_abus(m, m->pc++);
 
-      if(!m->bra) { m->ad = m->pc; m->tcu += 2; }
+      if(!m->bra) { 
+        m->ad = m->pc; 
+        m->tcu += 2; 
+
+        m->interrupt_poll = true;
+      }
       break;
     }
     case 2: {
       uint8_t data = m6510_get_dbus(m);
       m->ad = (uint16_t)(m->pc + (int8_t)data);
       m6510_set_abus(m, m->pc);
-      if(m->adh == m->pch) { m->tcu++; }
+      if(m->adh == m->pch) { 
+        m->tcu++; 
+
+        m->interrupt_poll = true;
+      }
       break;
     }
     case 3: {
       m6510_set_abus(m, (m->pch << 8) | m->adl);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -145,6 +163,8 @@ static inline void zpgr(m65xx_t* const m) {
     }
     case 2: {
       m6510_set_abus(m, m6510_get_dbus(m));
+      
+      m->interrupt_poll = true;
       break;
     }
     case 3: { 
@@ -170,7 +190,9 @@ static inline void zpgw(m65xx_t* const m) {
       m6510_set_abus(m, m6510_get_dbus(m));
 
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m); 
+      m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 3: {
@@ -201,6 +223,8 @@ static inline void zpgm(m65xx_t* const m) {
     case 4: {
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m); 
+
+      m->interrupt_poll = true;
       break;
     }
     case 5: {
@@ -228,6 +252,8 @@ static inline void zpxr(m65xx_t* const m) {
     case 3: {
       m->adl = (m->adl + m->x) & 0xFF;
       m6510_set_abus(m, m->adl);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -259,6 +285,8 @@ static inline void zpxw(m65xx_t* const m) {
 
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -293,7 +321,9 @@ static inline void zpxm(m65xx_t* const m) {
     }
     case 5: {
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m); 
+      m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -321,6 +351,8 @@ static inline void zpyr(m65xx_t* const m) {
     case 3: {
       m->adl = (m->adl + m->y) & 0xFF;
       m6510_set_abus(m, m->adl);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -351,14 +383,17 @@ static inline void zpyw(m65xx_t* const m) {
       m6510_set_abus(m, m->adl);
 
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m);  
+      m6502_opcode_table[m->ir].instr(m); 
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
       m->tcu = 0;
       m6510_fetch(m);
       break;
-    default:
+    }
+    default: {
       printf(RED "Error:" RESET " invalid cycle count for zeropage, y write addressing mode\n");
       break; 
     }
@@ -379,6 +414,8 @@ static inline void absr(m65xx_t* const m) {
     case 3: {
       m->adh = m6510_get_dbus(m);
       m6510_set_abus(m, m->ad);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -410,7 +447,9 @@ static inline void absw(m65xx_t* const m) {
       m6510_set_abus(m, m->ad);
 
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m); 
+      m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -447,7 +486,9 @@ static inline void absm(m65xx_t* const m) {
     }
     case 5: {
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m); 
+      m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -476,11 +517,17 @@ static inline void abxr(m65xx_t* const m) {
     case 3: {
       m->adh = m6510_get_dbus(m);
       m6510_set_abus(m, (m->adh << 8) | ((m->adl + m->x) & 0xFF));
-      if (~(m->adh - ((m->ad + m->x) >> 8)) & 0x1) { m->tcu++; break; }
+      if (~(m->adh - ((m->ad + m->x) >> 8)) & 0x1) { 
+        m->tcu++; 
+      
+        m->interrupt_poll = true;
+      }
       break;
     }
     case 4: {
       m6510_set_abus(m, m->ad + m->x);
+      
+      m->interrupt_poll = true;
       break;
     }
     case 5: {
@@ -510,6 +557,8 @@ static inline void abxw(m65xx_t* const m) {
     case 3: {
       m->adh = m6510_get_dbus(m);
       m6510_set_abus(m, (m->adh << 8) | ((m->adl + m->x) & 0xFF));
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -557,6 +606,8 @@ static inline void abxm(m65xx_t* const m) {
     case 6: {
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m); 
+      
+      m->interrupt_poll = true;
       break;
     }
     case 7: {
@@ -586,11 +637,17 @@ static inline void abyr(m65xx_t* const m) {
       m->adh = m6510_get_dbus(m);
 
       m6510_set_abus(m, (m->adh << 8) | ((m->adl + m->y) & 0xFF));
-      if (~(m->adh - ((m->ad + m->y) >> 8)) & 0x1) { m->tcu++; break; }
+      if (~(m->adh - ((m->ad + m->y) >> 8)) & 0x1) { 
+        m->tcu++; 
+      
+        m->interrupt_poll = true;
+      }
       break;
     }
     case 4: {
       m6510_set_abus(m, m->ad + m->y);
+
+      m->interrupt_poll = true;
       break;
     }
     case 5: {
@@ -627,6 +684,8 @@ static inline void abyw(m65xx_t* const m) {
 
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m); 
+      
+      m->interrupt_poll = true;
       break;
     }
     case 5: {
@@ -667,6 +726,8 @@ static inline void abym(m65xx_t* const m) {
     case 6: {
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m);
+      
+      m->interrupt_poll = true;
       break;
     }
     case 7: {
@@ -705,6 +766,8 @@ static inline void idxr(m65xx_t* const m) {
     case 5: {
       m->adh = m6510_get_dbus(m);
       m6510_set_abus(m, m->ad);
+      
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -747,6 +810,8 @@ static inline void idxw(m65xx_t* const m) {
 
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m);  
+      
+      m->interrupt_poll = true;
       break;
     }
     case 6: { 
@@ -793,6 +858,8 @@ static inline void idxm(m65xx_t* const m) {
     case 7: {
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m);  
+      
+      m->interrupt_poll = true;
       break;
     }
     case 8: {
@@ -828,6 +895,8 @@ static inline void idyr(m65xx_t* const m) {
       if (~(m->adh - ((m->ad + m->y) >> 8)) & 0x1) { 
         m->tcu++;       
         m6510_set_abus(m, m->ad + m->y);
+
+        m->interrupt_poll = true;
         break; 
       }
       m6510_set_abus(m, (m->ad & 0xFF00) | ((m->ad + m->y) & 0xFF));
@@ -835,6 +904,8 @@ static inline void idyr(m65xx_t* const m) {
     }
     case 5: {
       m6510_set_abus(m, m->ad + m->y);
+      
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -874,7 +945,9 @@ static inline void idyw(m65xx_t* const m) {
       m6510_set_abus(m, m->ad + m->y);
 
       m6510_pin_off(m, M6510_RW);
-      m6502_opcode_table[m->ir].instr(m); 
+      m6502_opcode_table[m->ir].instr(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: { 
@@ -920,6 +993,8 @@ static inline void idym(m65xx_t* const m) {
     case 7: {
       m6510_pin_off(m, M6510_RW);
       m6502_opcode_table[m->ir].instr(m);  
+      
+      m->interrupt_poll = true;
       break;
     }
     case 8: {
@@ -1134,7 +1209,6 @@ static inline void res(m65xx_t* const m) {
 // Legal instructions 
 
 
-
 static inline void nop(m65xx_t* const m) { (void) *m; }
 
 
@@ -1174,6 +1248,8 @@ static inline void jsr(m65xx_t* const m) {
     }
     case 5: {
       m6510_set_abus(m, m->pc);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -1199,6 +1275,8 @@ static inline void abj(m65xx_t* const m) {
     case 2: {
       m->adl = m6510_get_dbus(m);
       m6510_set_abus(m, m->pc++);
+
+      m->interrupt_poll = true;
       break;
     }
     case 3: {
@@ -1234,6 +1312,8 @@ static inline void inj(m65xx_t* const m) {
     case 4: { 
       m6510_set_abus(m, (m->adh << 8) | ((m->adl + 1) & 0xFF));
       m->adl = m6510_get_dbus(m);
+
+      m->interrupt_poll = true;
       break;
     }
     case 5: {
@@ -1262,6 +1342,8 @@ static inline void php(m65xx_t* const m) {
     case 2: {
       m6510_pin_off(m, M6510_RW);
       m6510_set_abus_dbus(m, 0x100 | m->s--, m->p | BF);
+
+      m->interrupt_poll = true;
       break;
     }
     case 3: {
@@ -1287,6 +1369,8 @@ static inline void plp(m65xx_t* const m) {
     }
     case 3: {
       m6510_set_abus(m, 0x100| ++m->s);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -1311,6 +1395,8 @@ static inline void pha(m65xx_t* const m) {
     case 2: {
       m6510_pin_off(m, M6510_RW);
       m6510_set_abus_dbus(m, 0x100 | m->s--, m->a);
+
+      m->interrupt_poll = true;
       break;
     }
     case 3: {
@@ -1336,6 +1422,8 @@ static inline void pla(m65xx_t* const m) {
     }
     case 3: {
       m6510_set_abus(m, 0x100| ++m->s);
+
+      m->interrupt_poll = true;
       break;
     }
     case 4: {
@@ -1376,6 +1464,8 @@ static inline void rti(m65xx_t* const m) {
     case 5: {
       m->pcl = m6510_get_dbus(m);
       m6510_set_abus(m, 0x100 | ++m->s);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -1413,6 +1503,8 @@ static inline void rts(m65xx_t* const m) {
     case 5: {
       m->pch = m6510_get_dbus(m);
       m6510_set_abus(m, m->pc++);
+
+      m->interrupt_poll = true;
       break;
     }
     case 6: {
@@ -2234,39 +2326,77 @@ void m6510_init(m65xx_t* const m) {
   
   memset(m, 0, sizeof(*m));
 
-  m->m6510_pins |= (M6510_RW | M6510_SYNC);
-  m->a = m->x = m->y = m->p = m->tcu = 0;
+  m->m6510_pins |= (M6510_RW | M6510_SYNC | M6510_RES);
   m->s = 0xFD;
   m->p |= 0x20;
   m->ir = 0x00; 
 }
 
+void m6510_poll_interrupt_requests(m65xx_t* const m) {
+
+  if(m->interrupt_poll == true) {
+
+    if(m->nmi_edge_sensitive) {
+
+      m->nmi_active = 1;
+      m->nmi_edge_sensitive = 0;
+    }
+
+    if((m->m6510_pins & M6510_IRQ) && !(m->p & IDF)) {
+      m->irq_active = 1;
+    }
+    m->interrupt_poll = false;
+  }
+}
+
 void m6510_tick(m65xx_t* const m) {
 
-  if((m->m6510_pins & M6510_NMI) && !(m->nmi_edge)) { m->nmi_occurred = 1; }
-  m->nmi_edge = m->m6510_pins & M6510_NMI; // Updates if a edge case has occured
+  // During every master cycle, the Commodore 64 must check for NMI edge cases,
+  // even if the CPU stalled.
+  if((m->m6510_pins & M6510_NMI) && m->nmi_previous_state == 0) { 
+    m->nmi_edge_sensitive = 1; 
+  }
+  if((m->m6510_pins & M6510_NMI) != m->nmi_previous_state) { 
+    m->nmi_previous_state = m->m6510_pins & M6510_NMI; 
+  }
 
-  if((m->m6510_pins & M6510_IRQ) && !(m->p & IDF)) { m->irq_occurred = 1; } else { m->irq_occurred = 0; }
+  if((m->m6510_pins & (M6510_RW | M6510_RDY)) == (M6510_RW | M6510_RDY)) {
+    m6510_set_port(m);
+    return;
+  }
 
   if(m->m6510_pins & M6510_SYNC) {
-    m->ir = m6510_get_dbus(m);
+    
     m6510_pin_off(m, M6510_SYNC);
-    m->cpu_instr_done = 0;
+  
+    // Logic for executing interrupts here
+    if(m->m6510_pins & M6510_RES) {
+      m->ir = M6510_RES_OPCODE;
 
-    if(m->nmi_occurred) {
+      m->nmi_active = false;
+      m->irq_active = false;
+    }
+    else if(m->nmi_active == true) {
       m->ir = M6510_NMI_OPCODE;
-      m->nmi_occurred = 0;
+      m->nmi_active = false;
     }
-    else if(m->irq_occurred) {
+    else if(m->irq_active == true) {
       m->ir = M6510_IRQ_OPCODE;
-      m->irq_occurred = 0;
+      m->irq_active = false;
+    } 
+    else {
+      m->ir = m6510_get_dbus(m);
+      m->pc++; 
     }
-    else { m->pc++; }
+    m->cpu_instr_done = 0;
   }
-  m6510_pin_on(m, M6510_RW);
 
   m->tcu++;
   m->cpu_clock++;
+
+  m6510_pin_on(m, M6510_RW);
   // Call instruction/addressing mode 
   m6502_opcode_table[m->ir].mode(m);
+
+  m6510_poll_interrupt_requests(m);
 }

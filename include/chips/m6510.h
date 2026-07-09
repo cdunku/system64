@@ -29,10 +29,11 @@ typedef struct m65xx_t {
   bool bra;
   uint64_t cpu_clock;
 
-  // nmi_edge holds the edge case value, nmi_occurred executes a non-maskable interrupt.
-  bool nmi_edge, nmi_occurred, irq_occurred;
-
-  bool cpu_freeze, cpu_instr_done;
+  // Checks for interrupt polling in the second-to-last cycle of each instruction 
+  // (BRK and its derivatives are excluded)
+  bool interrupt_poll, nmi_edge_sensitive, nmi_previous_state, nmi_active, irq_active;
+  
+  bool cpu_instr_done;
 
   m6510_port_t *port;
 

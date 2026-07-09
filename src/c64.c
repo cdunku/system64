@@ -3,6 +3,9 @@
 
 #include "c64_bus.h"
 
+static uint8_t c64_port_in(void *user_data);
+static void c64_port_out(uint8_t data, void *user_data);
+
 SDL_Color c64_colors[16] = {
   { 0x00, 0x00, 0x00, 0xFF }, // Black
   { 0xFF, 0xFF, 0xFF, 0xFF }, // White
@@ -22,7 +25,7 @@ SDL_Color c64_colors[16] = {
   { 0xBB, 0xBB, 0xBB, 0xFF }, // Light grey/grey 3
 };
 
-void c64_init_display(c64_t *c64) {
+static void c64_init_display(c64_t *c64) {
   
   c64->display->pixel_format = SDL_PIXELFORMAT_INDEX8;
   c64->display->texture_format = SDL_PIXELFORMAT_XRGB8888;
@@ -36,27 +39,29 @@ void c64_init_display(c64_t *c64) {
 }
 
 void c64_init(c64_t *c64) {
+  
+  memset(c64, 0, sizeof(*c64));
+  c64_init_display(c64);
 
   m6510_init(c64->m6510);
-  vic_ii_init(c64->vic);
-
-  memset(c64, 0, sizeof(*c64));
+  c64->m6510->port->in_extern_device = c64_port_in;
+  c64->m6510->port->out_extern_device = c64_port_out;
+  c64->m6510->port->user_data = c64;
 
   c64->c64_pins = c64->m6510->m6510_pins;
 
-  c64_init_display(c64);
+
+  vic_ii_init(c64->vic);
+
+
 }
 
 void c64_tick(c64_t* c64) {
   m65xx_t *c = c64->m6510;
   vic_ii_t *v = c64->vic; 
 
-  uint8_t cycles_till_cpu_freeze = 0;
-
-  if(c->cpu_freeze == false) {
-    c->m6510_pins = c64->c64_pins;
-    m6510_tick(c);
-  }
+  c->m6510_pins = c64->c64_pins;
+  m6510_tick(c);
 
   const uint16_t main_address = m6510_get_abus(c); 
 
@@ -67,18 +72,16 @@ void c64_tick(c64_t* c64) {
   vic_ii_run(v);
 
   if((v->vic_pins & VIC_II_BA))  {
-    if(cycles_till_cpu_freeze < 3) { cycles_till_cpu_freeze++; }
-    if (c->cpu_instr_done == true || cycles_till_cpu_freeze == 3) {
+    if(c64->cycles_till_cpu_freeze < 3) { c64->cycles_till_cpu_freeze++; }
+    if (c->cpu_instr_done == true || c64->cycles_till_cpu_freeze == 3) {
       
       m6510_pin_off(c, M6510_RDY);
-      c->cpu_freeze = 1;
-      cycles_till_cpu_freeze = 0;
+      c64->cycles_till_cpu_freeze = 0;
     }
   }
   else {
     m6510_pin_on(c, M6510_RDY);
-    c->cpu_freeze = 0;
-    cycles_till_cpu_freeze = 0;
+    c64->cycles_till_cpu_freeze = 0;
   }
 
   c64->master_clock++;
@@ -100,4 +103,13 @@ void c64_run(c64_t* c64) {
 
 
   return;
+}
+
+
+static uint8_t c64_port_in(void *user_data) {
+  c64_t *c64 = (c64_t*) user_data;
+}
+static void c64_port_out(uint8_t data, void *user_data) {
+  c64_t *c64 = (c64_t*) user_data;
+  data = 0;
 }

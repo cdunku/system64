@@ -14,9 +14,11 @@ typedef enum M6510_PINOUT {
 
   M6510_ABUS_SHIFT = 0,
   M6510_DBUS_SHIFT = 16,
+  M6510_PORT_SHIFT = 30,
 
   M6510_ABUS_MASK  = 0xFFFFULL << M6510_ABUS_SHIFT,
   M6510_DBUS_MASK  = 0xFFULL   << M6510_DBUS_SHIFT,
+  M6510_PORT_MASK  = 0x3FULL   << M6510_PORT_SHIFT,
 
   // control pins start AFTER DBUS
   M6510_RDY_PIN = 24,
@@ -98,6 +100,11 @@ typedef struct m6510_port_t {
   // This the final state of the port pins of the CPU.
   uint8_t final_lines_state;
 
+  // This helps us to fetch the current state and the data of the emulator we are emulating.
+  // This is helpful because if we were to include the c64_t into the *_extern_device() and m6510_check_io_requests functions,
+  // this could cause circular-dependency hell.
+  void *user_data;
+
 } m6510_port_t;
 
 
@@ -117,5 +124,5 @@ uint8_t m6510_get_dbus(const m65xx_t* m);
 void m6510_pin_on(m65xx_t *m, uint64_t bit);
 void m6510_pin_off(m65xx_t *m, uint64_t bit);
 
-void m6510_set_port(m65xx_t *m, uint8_t data);
+void m6510_set_port(m65xx_t *m);
 void m6510_check_io_requests(m65xx_t* const m);

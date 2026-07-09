@@ -362,11 +362,11 @@ uint8_t inte = 0;
 
 void m6502_interrupt_handler(m65xx_t* const m) {
   if ((inte & 0x2) == 0x2) {
-    m->nmi_occurred = 1;
+    m->nmi_active = 1;
     inte &= ~0x2;
     }
   else if (!(m->p & IDF) && (inte & 0x1) == 0x1) {
-    m->irq_occurred = 1;
+    m->irq_active = 1;
     inte &= ~0x1;
   }
 }
