@@ -2332,21 +2332,18 @@ void m6510_init(m65xx_t* const m) {
   m->ir = 0x00; 
 }
 
-void m6510_poll_interrupt_requests(m65xx_t* const m) {
+static inline void m6510_poll_interrupt_requests(m65xx_t* const m) {
 
-  if(m->interrupt_poll == true) {
+  if(m->nmi_edge_sensitive) {
 
-    if(m->nmi_edge_sensitive) {
-
-      m->nmi_active = 1;
-      m->nmi_edge_sensitive = 0;
-    }
-
-    if((m->m6510_pins & M6510_IRQ) && !(m->p & IDF)) {
-      m->irq_active = 1;
-    }
-    m->interrupt_poll = false;
+    m->nmi_active = 1;
+    m->nmi_edge_sensitive = 0;
   }
+  if((m->m6510_pins & M6510_IRQ) && !(m->p & IDF)) {
+    m->irq_active = 1;
+  }
+
+  m->interrupt_poll = false;
 }
 
 void m6510_tick(m65xx_t* const m) {
@@ -2398,5 +2395,5 @@ void m6510_tick(m65xx_t* const m) {
   // Call instruction/addressing mode 
   m6502_opcode_table[m->ir].mode(m);
 
-  m6510_poll_interrupt_requests(m);
+  if(m->interrupt_poll == true) { m6510_poll_interrupt_requests(m); }
 }
