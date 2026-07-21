@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "vic-ii_bus.h"
@@ -7,22 +8,35 @@
 #include "m6510.h"
 #include "m6510_bus.h"
 
-void vic_ii_init(vic_ii_t *vic) {
+vic_timing_t *vic_std_init(void) {
 
-  memset(vic, 0, sizeof(*vic));
+  vic_timing_t *vic_std = malloc(sizeof(vic_timing_t));
+  memset(vic_std, 0, sizeof(vic_timing_t));
 
-  vic->vic_time->std = VIC_PAL;
+  vic_std->std = VIC_PAL;
 
-  if(vic->vic_time->std == VIC_PAL) {
-    vic->vic_time->cycle_per_line = 63;
-    vic->vic_time->lines_per_frame = 312;
+  if(vic_std->std == VIC_PAL) {
+    vic_std->cycle_per_line = 63;
+    vic_std->lines_per_frame = 312;
   }
+
+  return vic_std;
+}
+
+
+vic_ii_t *vic_ii_init(void) {
+
+  vic_ii_t *vic = malloc(sizeof(vic_ii_t));
+  memset(vic, 0, sizeof(vic_ii_t));
+
+  vic->vic_time = vic_std_init();
 
   vic->vic_reg[CONTROL_REG1] = 0x9B;
   vic->vic_reg[CONTROL_REG2] = 0x08;
 
   vic->vic_reg[MEMORY_POINTER] = 0x14;
 
+  return vic;
 }
 
 static inline uint16_t vic_get_raster(const vic_ii_t *vic) {
@@ -52,13 +66,12 @@ void vic_set_reg(vic_ii_t *vic, uint16_t addr, uint8_t val) {
       // In the original chip:
       // 0 -> Sets the flag 
       // 1 -> Clear the flag
-      //
-      // But instead we will just do it vice-versa for better readability.
-      vic->vic_reg[r] &= ~val;
+
+      vic->vic_reg[r] &= (~val & 0x0F);
       break;
     }
     case INTERRUPT_ENABLED: {
-      vic->vic_reg[r] |= 0xF0;
+      vic->vic_reg[r] = (val & 0x0F) | 0xF0;
 
       break;
     }
@@ -105,6 +118,21 @@ static inline void vic_tick(vic_ii_t *vic) {
       }
   }
 
+  // Checks whether if an interrupt is set.
+  // If so enable the IRQ bit in the latch.
+  if(vic->vic_reg[INTERRUPT_LATCH] & 0x0F) {
+    vic->vic_reg[INTERRUPT_LATCH] |= INTERRUPT_REQUEST;
+  }
+  // If there are no interrupts clear the IRQ bit.
+  else {
+    vic->vic_reg[INTERRUPT_LATCH] &= ~INTERRUPT_REQUEST;
+  }
+  
+  // If the IRQ bit is set, IRQ pin is active
+  if(vic->vic_reg[INTERRUPT_LATCH] & INTERRUPT_REQUEST) {
+    vic_pin_on(vic, VIC_II_IRQ);
+  }
+
   vic->x_pos++;
 
   if(vic->x_pos == vic->vic_time->cycle_per_line) {
@@ -116,6 +144,7 @@ static inline void vic_tick(vic_ii_t *vic) {
       vic->frame++;
     }
   }
+
 }
 
 void vic_ii_run(vic_ii_t *vic) {

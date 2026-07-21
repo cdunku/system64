@@ -102,7 +102,7 @@ bool host_texture_create(host_display_t* disp) {
 // each if-statement for checking the state has a special error message with SDL_GetError() called.
 bool init_host_display(host_display_t *disp, const char *title, int width, int height) {
 
-  if(!SDL_Init(SDL_INIT_VIDEO)) {
+  if(SDL_Init(SDL_INIT_VIDEO) == false) {
     fprintf(stderr, "Error: failed to initialise SDL3 display (%s)\n", SDL_GetError());
     return false;
   }

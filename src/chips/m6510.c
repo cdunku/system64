@@ -2322,14 +2322,17 @@ m65xx_opcodes_t m6502_opcode_table[0x103] = {
   [0x102] = { .mode = irq, .instr = impl },
 }; 
 
-void m6510_init(m65xx_t* const m) {
+m65xx_t *m6510_init(void) {
   
-  memset(m, 0, sizeof(*m));
+  m65xx_t *m = malloc(sizeof(m65xx_t));
+  memset(m, 0, sizeof(m65xx_t));
 
   m->m6510_pins |= (M6510_RW | M6510_SYNC | M6510_RES);
   m->s = 0xFD;
   m->p |= 0x20;
   m->ir = 0x00; 
+
+  return m;
 }
 
 static inline void m6510_poll_interrupt_requests(m65xx_t* const m) {

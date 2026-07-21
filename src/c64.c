@@ -1,12 +1,15 @@
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
+#include "c64.h"
 #include "c64_bus.h"
+#include "c64_bus_helpers.h"
 
 static uint8_t c64_port_in(void *user_data);
 static void c64_port_out(uint8_t data, void *user_data);
 
-SDL_Color c64_colors[16] = {
+extern SDL_Color c64_colors[16] = {
   { 0x00, 0x00, 0x00, 0xFF }, // Black
   { 0xFF, 0xFF, 0xFF, 0xFF }, // White
   { 0x88, 0x00, 0x00, 0xFF }, // Red
@@ -25,35 +28,42 @@ SDL_Color c64_colors[16] = {
   { 0xBB, 0xBB, 0xBB, 0xFF }, // Light grey/grey 3
 };
 
-static void c64_init_display(c64_t *c64) {
-  
-  c64->display->pixel_format = SDL_PIXELFORMAT_INDEX8;
-  c64->display->texture_format = SDL_PIXELFORMAT_XRGB8888;
-  c64->display->access = SDL_TEXTUREACCESS_STREAMING;
-  c64->display->filter_mode = SDL_SCALEMODE_NEAREST;
+host_display_t *c64_init_display(void) {
 
-  c64->display->colors_amount = 16;
-  c64->display->palette_colors = c64_colors;
+  host_display_t *display = malloc(sizeof(host_display_t));
+  memset(display, 0, sizeof(host_display_t));
 
-  init_host_display(c64->display, "Sea64", 320, 200);
+  display->pixel_format = SDL_PIXELFORMAT_INDEX8;
+  display->texture_format = SDL_PIXELFORMAT_XRGB8888;
+  display->access = SDL_TEXTUREACCESS_STREAMING;
+  display->filter_mode = SDL_SCALEMODE_NEAREST;
+
+  display->colors_amount = 16;
+  display->palette_colors = c64_colors;
+
+  init_host_display(display, "Sea64", 320, 200);
+
+  return display;
 }
 
-void c64_init(c64_t *c64) {
-  
-  memset(c64, 0, sizeof(*c64));
-  c64_init_display(c64);
+c64_t *c64_init(void) {
+ 
+  c64_t *c64 = malloc(sizeof(c64_t));
+  memset(c64, 0, sizeof(c64_t));
+  c64->display = c64_init_display();
 
-  m6510_init(c64->m6510);
-  c64->m6510->port->in_extern_device = c64_port_in;
-  c64->m6510->port->out_extern_device = c64_port_out;
-  c64->m6510->port->user_data = c64;
+  c64->m6510 = m6510_init();
+  // c64->m6510->port->in_extern_device = c64_port_in;
+  // c64->m6510->port->out_extern_device = c64_port_out;
+  // c64->m6510->port->user_data = c64;
 
   c64->c64_pins = c64->m6510->m6510_pins;
 
 
-  vic_ii_init(c64->vic);
+  c64->vic = vic_ii_init();
 
 
+  return c64;
 }
 
 void c64_tick(c64_t* c64) {
@@ -70,7 +80,8 @@ void c64_tick(c64_t* c64) {
 
   v->vic_pins = c64->c64_pins & VIC_II_PINOUT_MASK;
   vic_ii_run(v);
-
+  set_vic_pins_to_main_bus(c64);
+  
   if((v->vic_pins & VIC_II_BA))  {
     if(c64->cycles_till_cpu_freeze < 3) { c64->cycles_till_cpu_freeze++; }
     if (c->cpu_instr_done == true || c64->cycles_till_cpu_freeze == 3) {
@@ -99,6 +110,9 @@ void c64_run(c64_t* c64) {
     while(SDL_PollEvent(&event)) {
       if(event.type == SDL_EVENT_QUIT) { running = false; }
     }
+    c64_tick(c64);
+    update_host_display(c64->display, c64->vic->video_buffer);
+    render_host_display(c64->display);
   }
 
 
@@ -108,6 +122,9 @@ void c64_run(c64_t* c64) {
 
 static uint8_t c64_port_in(void *user_data) {
   c64_t *c64 = (c64_t*) user_data;
+  uint8_t data = 0;
+
+  return data;
 }
 static void c64_port_out(uint8_t data, void *user_data) {
   c64_t *c64 = (c64_t*) user_data;

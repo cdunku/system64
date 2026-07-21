@@ -104,6 +104,6 @@ typedef struct vic_ii_t {
 
 } vic_ii_t;
 
-void vic_ii_init(vic_ii_t *vic);
+vic_ii_t *vic_ii_init(void);
 void vic_ii_run(vic_ii_t *vic);
 
