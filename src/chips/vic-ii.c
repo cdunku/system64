@@ -106,6 +106,17 @@ uint8_t vic_get_reg(vic_ii_t *vic, uint16_t addr) {
   }
 }
 
+void vic_bank_switching(vic_ii_t *vic) {
+
+  uint8_t bnk_ptr = vic->vic_reg[MEMORY_POINTER];
+
+  // Video Matrix is from bits 4 to 7.
+  uint8_t vm = bnk_ptr & 0xF0;
+  // Character Generator Data Block is from bits 1 to 3.
+  // 0th bit is unused.
+  uint8_t cb = bnk_ptr & 0x0E;
+}
+
 static inline void vic_tick(vic_ii_t *vic) {
 
   if((vic->x_pos == 1 && vic->y_pos == vic->raster_compare) || 

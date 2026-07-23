@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 typedef enum {
+
   SPRITE_X_COORD_0         = 0x00,
   SPRITE_Y_COORD_0         = 0x01,
   SPRITE_X_COORD_1         = 0x02,
@@ -58,6 +59,7 @@ typedef enum {
   COLOR_SPRITE_5           = 0x2C,
   COLOR_SPRITE_6           = 0x2D,
   COLOR_SPRITE_7           = 0x2E,
+
 } VIC_REGISTERS;
 
 
@@ -84,6 +86,24 @@ typedef enum {
 
 } VIC_INTERRUPT_FLAGS;
 
+typedef enum {
+
+  // For the Video Matrix
+  uint16_t c_access; // 12-bits wide
+  // To the Pixel Data
+  uint8_t g_access;
+  // To the Sprite Data Pointers
+  uint8_t p_access;
+  // To the Sprite Data
+  uint8_t s_access;
+
+  // Accessing for refreshing the Dynamic RAM, 5 read cycles per raster line.
+  uint8_t dram_access;
+  // Executed if no other access previously mentioned is pending.
+  uint8_t idle_access;
+
+} vic_memory_access_units;
+
 typedef struct vic_ii_t {
 
   uint64_t vic_pins;
@@ -101,6 +121,7 @@ typedef struct vic_ii_t {
   uint8_t color_ram[0x400];
 
   vic_timing_t *vic_time;
+  vic_memory_access_units *mcu;
 
 } vic_ii_t;
 
