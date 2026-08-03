@@ -1,6 +1,6 @@
 .PHONY: all production release clean
 
-CC := gcc
+CC := clang
 BIN := sea64
 
 STD := -std=c2x

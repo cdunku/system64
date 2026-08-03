@@ -27,5 +27,7 @@ static inline void set_dbus(uint64_t *pins, uint64_t mask, unsigned shift, uint8
   *pins = (*pins & ~mask) | (((uint64_t)data << shift) & mask);
 }
 
-static inline void pin_on(uint64_t *pins, uint64_t bit)  { *pins |= bit; }
-static inline void pin_off(uint64_t *pins, uint64_t bit) { *pins &= ~bit; }
+static inline void pin_on(uint64_t *pins, uint64_t pin)  { *pins |= pin; }
+static inline void pin_off(uint64_t *pins, uint64_t pin) { *pins &= ~pin; }
+
+static inline bool pin_check(uint64_t pins, uint64_t pin) { return pins & pin; }

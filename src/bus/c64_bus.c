@@ -1,7 +1,6 @@
 #include <stdint.h>
 
 #include "c64_bus.h"
-#include "vic-ii_bus.h"
 
 /*
 *

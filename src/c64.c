@@ -60,15 +60,12 @@ c64_t *c64_init(void) {
   c64->c64_pins = c64->m6510->m6510_pins;
 
 
-  c64->vic = vic_ii_init();
-
 
   return c64;
 }
 
 void c64_tick(c64_t* c64) {
   m65xx_t *c = c64->m6510;
-  vic_ii_t *v = c64->vic; 
 
   c->m6510_pins = c64->c64_pins;
   m6510_tick(c);
@@ -77,23 +74,6 @@ void c64_tick(c64_t* c64) {
 
   // Manipulated by other chips that have access to the main bus as well. 
   c64->c64_pins = c->m6510_pins & ~(M6510_RDY | M6510_AEC | M6510_NMI | M6510_IRQ);
-
-  v->vic_pins = c64->c64_pins & VIC_II_PINOUT_MASK;
-  vic_ii_run(v);
-  set_vic_pins_to_main_bus(c64);
-  
-  if((v->vic_pins & VIC_II_BA))  {
-    if(c64->cycles_till_cpu_freeze < 3) { c64->cycles_till_cpu_freeze++; }
-    if (c->cpu_instr_done == true || c64->cycles_till_cpu_freeze == 3) {
-      
-      m6510_pin_off(c, M6510_RDY);
-      c64->cycles_till_cpu_freeze = 0;
-    }
-  }
-  else {
-    m6510_pin_on(c, M6510_RDY);
-    c64->cycles_till_cpu_freeze = 0;
-  }
 
   c64->master_clock++;
 }
@@ -111,7 +91,7 @@ void c64_run(c64_t* c64) {
       if(event.type == SDL_EVENT_QUIT) { running = false; }
     }
     c64_tick(c64);
-    update_host_display(c64->display, c64->vic->video_buffer);
+    // update_host_display(c64->display, c64->vic->video_buffer);
     render_host_display(c64->display);
   }
 

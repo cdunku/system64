@@ -1,11 +1,7 @@
 #pragma once 
 
-#include "m6510.h"
+#include "6510.h"
 #include "bus_template.h"
-
-#define LORAM 0x1
-#define HIRAM 0x2
-#define CHAREN 0x4
 
 typedef struct m65xx_t m65xx_t;
 
@@ -14,14 +10,14 @@ typedef enum M6510_PINOUT {
 
   M6510_ABUS_SHIFT = 0,
   M6510_DBUS_SHIFT = 16,
-  M6510_PORT_SHIFT = 30,
+  M6510_PORT_SHIFT = 32,
 
   M6510_ABUS_MASK  = 0xFFFFULL << M6510_ABUS_SHIFT,
   M6510_DBUS_MASK  = 0xFFULL   << M6510_DBUS_SHIFT,
   M6510_PORT_MASK  = 0x3FULL   << M6510_PORT_SHIFT,
 
   // control pins start AFTER DBUS
-  M6510_RDY_PIN = 24,
+  M6510_RDY_PIN = 26,
   M6510_IRQ_PIN,
   M6510_RW_PIN,
   M6510_AEC_PIN,

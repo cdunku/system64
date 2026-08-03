@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "m6510.h"
-#include "m6510_bus.h"
+#include "6510.h"
+#include "6510_bus.h"
 
 #include "debug_format.h"
 

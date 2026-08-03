@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "m6510.h"
+#include "6510.h"
 #include "debug.h"
 
 const opcode_info_t m6502_opcodes[0x103] = {

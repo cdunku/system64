@@ -4,17 +4,14 @@
 
 #include "bus_template.h"
 
-#include "m6510.h"
-#include "vic-ii.h"
+#include "6510.h"
 #include "display.h"
 
-#include "m6510_bus.h"
-#include "vic-ii_bus.h"
+#include "6510_bus.h"
 
 typedef struct c64_t {
 
   m65xx_t *m6510;
-  vic_ii_t *vic;
 
   host_display_t *display;
 
