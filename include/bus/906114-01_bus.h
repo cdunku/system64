@@ -40,18 +40,18 @@ typedef enum {
 
   // Individual pins inside INPUT mask
   
-  C64_PLA_I_CAS_PIN = 15,
+  C64_PLA_I_CAS_PIN,
   C64_PLA_I_LORAM_PIN,
   C64_PLA_I_HIRAM_PIN,
   C64_PLA_I_CHAREN_PIN,
   C64_PLA_I_GAME8_PIN,
   C64_PLA_I_EXROM9_PIN,
+  C64_PLA_I_BA_PIN,
+  C64_PLA_I_AEC_PIN,
+  C64_PLA_I_RW_PIN,
 
   C64_PLA_FE_PIN,
   C64_PLA_CE_PIN,
-
-  C64_PLA_I_BA_PIN = 26,
-  C64_PLA_I_AEC_PIN = 29,
 
 } C64_PLA_PINOUT;
 
@@ -70,9 +70,7 @@ static const uint64_t C64_PLA_I_HIRAM      = PINMASK(C64_PLA_I_HIRAM_PIN);
 static const uint64_t C64_PLA_I_CHAREN     = PINMASK(C64_PLA_I_CHAREN_PIN);
 static const uint64_t C64_PLA_I_GAME8      = PINMASK(C64_PLA_I_GAME8_PIN);
 static const uint64_t C64_PLA_I_EXROM9     = PINMASK(C64_PLA_I_EXROM9_PIN);
-
-static const uint64_t C64_PLA_FE           = PINMASK(C64_PLA_FE_PIN);
-static const uint64_t C64_PLA_CE           = PINMASK(C64_PLA_CE_PIN);
+static const uint64_t C64_PLA_I_RW         = PINMASK(C64_PLA_I_RW_PIN);
 
 static const uint64_t C64_PLA_I_BA         = PINMASK(C64_PLA_I_BA_PIN);
 static const uint64_t C64_PLA_I_AEC        = PINMASK(C64_PLA_I_AEC_PIN);
@@ -86,9 +84,12 @@ static const uint64_t C64_PLA_VA12         = PINMASK(C64_PLA_VA12_PIN);
 static const uint64_t C64_PLA_VA13         = PINMASK(C64_PLA_VA13_PIN);
 static const uint64_t C64_PLA_VA14         = PINMASK(C64_PLA_VA14_PIN);
 
+static const uint64_t C64_PLA_FE           = PINMASK(C64_PLA_FE_PIN);
+static const uint64_t C64_PLA_CE           = PINMASK(C64_PLA_CE_PIN);
+
 typedef struct {
 
-  uint16_t pla_lut[0x10000];
+  uint8_t pla_lut[LUT_SIZE];
   uint64_t pla_pins;
 
 } c64_pla_t;
