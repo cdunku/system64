@@ -1,6 +1,53 @@
 #include "6510.h"
 #include "6510_bus.h"
 
+const pin_state_table_t m6510_pin_state_table[38] =  {
+
+  [M6510_A0_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A1_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A2_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A3_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A4_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A5_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A6_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A7_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A8_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A9_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_A10_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A11_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A12_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A13_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A14_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A15_PIN]  = { .active = HI, .inactive = LO },
+
+  [M6510_D0_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D1_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D2_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D3_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D4_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D5_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D6_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D7_PIN]   = { .active = HI, .inactive = LO },
+
+  [M6510_RDY_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_RW_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_SYNC_PIN] = { .active = HI, .inactive = LO },
+  [M6510_AEC_PIN]  = { .active = HI, .inactive = LO },
+
+  [M6510_NMI_PIN]  = { .active = LO, .inactive = HI },
+  [M6510_IRQ_PIN]  = { .active = LO, .inactive = HI },
+  [M6510_RES_PIN]  = { .active = LO, .inactive = HI },
+
+  [M6510_P0_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P1_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P2_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P3_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P4_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P5_PIN]   = { .active = HI, .inactive = LO },
+
+};
+
+
 void m6510_set_abus(m65xx_t* m, uint16_t addr) { 
   set_abus(&m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT, addr); 
 }
@@ -19,8 +66,13 @@ uint8_t m6510_get_dbus(const m65xx_t* m) {
   return get_dbus(m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT);
 }
 
-void m6510_pin_on(m65xx_t *m, uint64_t bit) { pin_on(&m->m6510_pins, bit); }
-void m6510_pin_off(m65xx_t *m, uint64_t bit) { pin_off(&m->m6510_pins, bit); }
+void m6510_set_pin(m65xx_t* m, PIN_ACTIVITY_STATE state, uint64_t pin) {
+  set_pin(&m->m6510_pins, m6510_pin_state_table, state, pin);
+}
+
+bool m6510_check_pin(const m65xx_t *m, uint64_t pin) {
+  return pin_check(m->m6510_pins, m6510_pin_state_table, pin);
+}
 
 void m6510_set_port(m65xx_t* const m) {
   m->m6510_pins = ((uint64_t)m->port->final_lines_state << M6510_PORT_SHIFT) & M6510_PORT_MASK;
@@ -39,7 +91,7 @@ void m6510_check_io_requests(m65xx_t* const m) {
 
   // Data Port -> ram[0x0001]
   if(m6510_get_abus(m) & 0x1) {
-    if(m->m6510_pins & M6510_RW) {
+    if(m6510_check_pin(m, M6510_RW_PIN)) {
 
       // Input Operation
   
@@ -71,7 +123,7 @@ void m6510_check_io_requests(m65xx_t* const m) {
   }
   // Data Direction Register -> ram[0x0000]
   else {
-    if(m->m6510_pins & M6510_RW) {
+    if(m6510_check_pin(m, M6510_RW_PIN)) {
       m6510_set_dbus(m, p->io_ddr);
     }
     else {

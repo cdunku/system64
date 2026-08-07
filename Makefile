@@ -1,4 +1,4 @@
-.PHONY: all production release clean
+.PHONY: all production release tests clean
 
 CC := clang
 BIN := sea64
@@ -7,12 +7,17 @@ STD := -std=c2x
 WARN := -Wall -Wextra -Wpedantic
 
 INCLUDES := $(addprefix -I,$(shell find include -type d))
-
 LIBS := `pkg-config --cflags --libs sdl3`
 
-# Recursively grab all source files
-SRCS := $(shell find src -name '*.c')
-OBJS := $(SRCS:.c=.o)
+# Find all application sources and filter out main.c
+ALL_SRCS := $(shell find src -name '*.c')
+APP_SRCS := $(filter-out src/main.c, $(ALL_SRCS))
+APP_OBJS := $(APP_SRCS:.c=.o)
+MAIN_OBJ := src/main.o
+
+# Find all test source files and map them to separate test executables
+TEST_SRCS := $(shell find tests -name '*.c')
+TEST_BINS := $(TEST_SRCS:.c=)
 
 # Default target
 all: production
@@ -24,24 +29,26 @@ production: $(BIN)
 
 # Release build (fast)
 release: CFLAGS := -O3 -march=native -flto -fno-plt -fomit-frame-pointer -DNDEBUG $(STD) $(WARN) $(INCLUDES) 
-release: LDFLAGS := -ljansson -flto $(LIBS)
+release: LDFLAGS := -flto $(LIBS)
 release: $(BIN)
 
-# Link
-$(BIN): $(OBJS)
-	@echo "[linking]   $(OBJS)"
-	@echo "[CFLAGS]    $(CFLAGS)"
-	@echo "[LDFLAGS]   $(LDFLAGS)"
-	@$(CC) -o $@ $(OBJS) $(LDFLAGS)
-	@echo "[produced]  $(BIN)"
+# Tests build - sets flags and builds ALL test binaries
+tests: CFLAGS := -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer $(STD) $(WARN) $(INCLUDES)
+tests: LDFLAGS := -ljansson -fsanitize=address,undefined $(LIBS)
+tests: $(TEST_BINS)
 
-# Compile
-%.o: %.c 
-	@echo "[compiling] $<"
-	@echo "[CFLAGS]    $(CFLAGS)"
-	@$(CC) $(CFLAGS) -c $< -o $@
+# Main Binary Link Rule
+$(BIN): $(APP_OBJS) $(MAIN_OBJ)
+	@echo "[linking main] $(BIN)"
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
+# Rule to build ANY test binary (e.g. tests/pla_test or tests/6510_test)
+# Links core application objects + the single test source file
+tests/%: tests/%.c $(APP_OBJS)
+	@echo "[building test] $@"
+	@$(CC) $(CFLAGS) $< $(APP_OBJS) -o $@ $(LDFLAGS)
 
 # Clean
 clean:
 	@echo "[cleaned]"
-	@rm -rf $(OBJS) $(BIN) *.gch ncore.* 2>/dev/null || true
+	@rm -rf $(APP_OBJS) $(MAIN_OBJ) $(BIN) $(TEST_BINS) *.gch ncore.* 2>/dev/null || true

@@ -73,7 +73,7 @@ void c64_tick(c64_t* c64) {
   const uint16_t main_address = m6510_get_abus(c); 
 
   // Manipulated by other chips that have access to the main bus as well. 
-  c64->c64_pins = c->m6510_pins & ~(M6510_RDY | M6510_AEC | M6510_NMI | M6510_IRQ);
+  // c64->c64_pins = c->m6510_pins & ~(M6510_RDY | M6510_AEC | M6510_NMI | M6510_IRQ);
 
   c64->master_clock++;
 }

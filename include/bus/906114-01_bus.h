@@ -55,37 +55,6 @@ typedef enum {
 
 } C64_PLA_PINOUT;
 
-static const uint64_t C64_PLA_F_CASRAM     = PINMASK(C64_PLA_F_CASRAM_PIN);
-static const uint64_t C64_PLA_F_BASIC_ROM  = PINMASK(C64_PLA_F_BASIC_ROM_PIN);
-static const uint64_t C64_PLA_F_KERNAL_ROM = PINMASK(C64_PLA_F_KERNAL_ROM_PIN);
-static const uint64_t C64_PLA_F_CHAROM     = PINMASK(C64_PLA_F_CHAROM_PIN);
-static const uint64_t C64_PLA_F_GRW        = PINMASK(C64_PLA_F_GRW_PIN);
-static const uint64_t C64_PLA_F_IO         = PINMASK(C64_PLA_F_IO_PIN);
-static const uint64_t C64_PLA_F_ROML       = PINMASK(C64_PLA_F_ROML_PIN);
-static const uint64_t C64_PLA_F_ROMH       = PINMASK(C64_PLA_F_ROMH_PIN);
-
-static const uint64_t C64_PLA_I_CAS        = PINMASK(C64_PLA_I_CAS_PIN);
-static const uint64_t C64_PLA_I_LORAM      = PINMASK(C64_PLA_I_LORAM_PIN);
-static const uint64_t C64_PLA_I_HIRAM      = PINMASK(C64_PLA_I_HIRAM_PIN);
-static const uint64_t C64_PLA_I_CHAREN     = PINMASK(C64_PLA_I_CHAREN_PIN);
-static const uint64_t C64_PLA_I_GAME8      = PINMASK(C64_PLA_I_GAME8_PIN);
-static const uint64_t C64_PLA_I_EXROM9     = PINMASK(C64_PLA_I_EXROM9_PIN);
-static const uint64_t C64_PLA_I_RW         = PINMASK(C64_PLA_I_RW_PIN);
-
-static const uint64_t C64_PLA_I_BA         = PINMASK(C64_PLA_I_BA_PIN);
-static const uint64_t C64_PLA_I_AEC        = PINMASK(C64_PLA_I_AEC_PIN);
-
-static const uint64_t C64_PLA_A12          = PINMASK(C64_PLA_A12_PIN);
-static const uint64_t C64_PLA_A13          = PINMASK(C64_PLA_A13_PIN);
-static const uint64_t C64_PLA_A14          = PINMASK(C64_PLA_A14_PIN);
-static const uint64_t C64_PLA_A15          = PINMASK(C64_PLA_A15_PIN);
-
-static const uint64_t C64_PLA_VA12         = PINMASK(C64_PLA_VA12_PIN);
-static const uint64_t C64_PLA_VA13         = PINMASK(C64_PLA_VA13_PIN);
-static const uint64_t C64_PLA_VA14         = PINMASK(C64_PLA_VA14_PIN);
-
-static const uint64_t C64_PLA_FE           = PINMASK(C64_PLA_FE_PIN);
-static const uint64_t C64_PLA_CE           = PINMASK(C64_PLA_CE_PIN);
 
 typedef struct {
 
@@ -93,3 +62,11 @@ typedef struct {
   uint64_t pla_pins;
 
 } c64_pla_t;
+
+extern const pin_state_table_t pla_pin_state_table[26];
+
+void pla_set_pin(c64_pla_t *pla, PIN_ACTIVITY_STATE state, uint64_t pin);
+bool pla_pin_check(c64_pla_t *pla, uint64_t pin);
+
+c64_pla_t *pla_init(void);
+uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins, uint64_t vic_pins, uint64_t cia_pins);

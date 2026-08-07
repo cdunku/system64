@@ -6,6 +6,59 @@
 
 #include "6510_bus.h"
 
+
+void pla_set_pin(c64_pla_t *pla, PIN_ACTIVITY_STATE state, uint64_t pin) {
+  set_pin(&pla->pla_pins, pla_pin_state_table, state, pin);
+}
+bool pla_pin_check(c64_pla_t *pla, uint64_t pin) {
+  return pin_check(pla->pla_pins, pla_pin_state_table, pin);
+}
+
+// Sets the output pins after checking input combinations
+static inline void output8_set_pin(uint8_t *pins8, PIN_ACTIVITY_STATE state, uint8_t pin) {
+  const pin_state_table_t *table = pla_pin_state_table;
+  PIN_ACTIVITY_STATE level = (state == HI) ? table[pin].active : table[pin].inactive;
+  if(level) { *pins8 |= PINMASK(pin); } else { *pins8 &= ~(PINMASK(pin)); } 
+}
+
+const pin_state_table_t pla_pin_state_table[26] = {
+
+  [C64_PLA_F_CASRAM_PIN]     = { .active = LO, .inactive = HI },
+  [C64_PLA_F_BASIC_ROM_PIN]  = { .active = LO, .inactive = HI },
+  [C64_PLA_F_KERNAL_ROM_PIN] = { .active = LO, .inactive = HI },
+  [C64_PLA_F_CHAROM_PIN]     = { .active = LO, .inactive = HI },
+  [C64_PLA_F_GRW_PIN]        = { .active = HI, .inactive = LO },
+  [C64_PLA_F_IO_PIN]         = { .active = LO, .inactive = HI },
+  [C64_PLA_F_ROML_PIN]       = { .active = LO, .inactive = HI },
+  [C64_PLA_F_ROMH_PIN]       = { .active = LO, .inactive = HI },
+
+  [C64_PLA_A12_PIN]          = { .active = HI, .inactive = LO },
+  [C64_PLA_A13_PIN]          = { .active = HI, .inactive = LO },
+  [C64_PLA_A14_PIN]          = { .active = HI, .inactive = LO },
+  [C64_PLA_A15_PIN]          = { .active = HI, .inactive = LO },
+
+  [C64_PLA_VA12_PIN]         = { .active = HI, .inactive = LO },
+  [C64_PLA_VA13_PIN]         = { .active = HI, .inactive = LO },
+  [C64_PLA_VA14_PIN]         = { .active = LO, .inactive = HI },
+
+  [C64_PLA_I_CAS_PIN]        = { .active = LO, .inactive = HI },
+  [C64_PLA_I_LORAM_PIN]      = { .active = LO, .inactive = HI },
+  [C64_PLA_I_HIRAM_PIN]      = { .active = LO, .inactive = HI },
+  [C64_PLA_I_CHAREN_PIN]     = { .active = LO, .inactive = HI },
+
+  [C64_PLA_I_GAME8_PIN]      = { .active = LO, .inactive = HI },
+  [C64_PLA_I_EXROM9_PIN]     = { .active = LO, .inactive = HI },
+
+  [C64_PLA_I_BA_PIN]         = { .active = HI, .inactive = LO },
+  [C64_PLA_I_AEC_PIN]        = { .active = LO, .inactive = HI },
+  [C64_PLA_I_RW_PIN]         = { .active = HI, .inactive = LO },
+
+  [C64_PLA_FE_PIN]           = { .active = HI, .inactive = LO },
+  [C64_PLA_CE_PIN]           = { .active = LO, .inactive = HI },
+
+};
+
+
 static inline bool shift_input_line(uint16_t pin, size_t shift) {
   return (shift >> pin) & 1;
 }
@@ -22,25 +75,25 @@ c64_pla_t *pla_init(void) {
   for(size_t i = 0; i < LUT_SIZE; i++) {
  
     // In hardware, the following pins are active-LOW.
-    // But in order to make the more readable, we set each chip to be active-HIGH.
-    bool cas    = shift_input_line(C64_PLA_I_CAS_PIN, i);
-    bool loram  = shift_input_line(C64_PLA_I_LORAM_PIN, i);  
-    bool hiram  = shift_input_line(C64_PLA_I_HIRAM_PIN, i); 
-    bool charen = shift_input_line(C64_PLA_I_CHAREN_PIN, i);
-    bool exrom  = shift_input_line(C64_PLA_I_EXROM9_PIN, i); 
-    bool game   = shift_input_line(C64_PLA_I_GAME8_PIN, i); 
-    bool aec    = shift_input_line(C64_PLA_I_AEC_PIN, i); 
+    bool cas    = !shift_input_line(C64_PLA_I_CAS_PIN, i);
+    bool loram  = !shift_input_line(C64_PLA_I_LORAM_PIN, i);  
+    bool hiram  = !shift_input_line(C64_PLA_I_HIRAM_PIN, i); 
+    bool charen = !shift_input_line(C64_PLA_I_CHAREN_PIN, i);
+    bool exrom  = !shift_input_line(C64_PLA_I_EXROM9_PIN, i); 
+    bool game   = !shift_input_line(C64_PLA_I_GAME8_PIN, i); 
+    bool aec    = !shift_input_line(C64_PLA_I_AEC_PIN, i); 
 
     // In hardware, these pins are active-HIGH.
-    bool a15    = shift_input_line(C64_PLA_A15_PIN, i);   
-    bool a14    = shift_input_line(C64_PLA_A14_PIN, i);   
-    bool a13    = shift_input_line(C64_PLA_A13_PIN, i);   
     bool a12    = shift_input_line(C64_PLA_A12_PIN, i);   
+    bool a13    = shift_input_line(C64_PLA_A13_PIN, i);   
+    bool a14    = shift_input_line(C64_PLA_A14_PIN, i);   
+    bool a15    = shift_input_line(C64_PLA_A15_PIN, i);   
+    bool va12   = shift_input_line(C64_PLA_VA12_PIN, i);
+    bool va13   = shift_input_line(C64_PLA_VA13_PIN, i);  
+    bool va14   = shift_input_line(C64_PLA_VA14_PIN, i); 
     bool ba     = shift_input_line(C64_PLA_I_BA_PIN, i);  
     bool rw     = shift_input_line(C64_PLA_I_RW_PIN, i); 
-    bool va13   = shift_input_line(C64_PLA_VA13_PIN, i);  
-    bool va12   = shift_input_line(C64_PLA_VA12_PIN, i);
-    bool va14   = shift_input_line(C64_PLA_VA14_PIN, i); 
+
 
     bool p[32];
 
@@ -105,30 +158,30 @@ c64_pla_t *pla_init(void) {
                         p[17] || p[18] || p[19] || p[20] || p[21] || p[22] || p[23] ||
                         p[24] || p[25] || p[26] || p[27] || p[28] || p[30];
     if(check_casram) {
-      output_pins |= C64_PLA_F_CASRAM;
+      output8_set_pin(&output_pins, LO, C64_PLA_F_CASRAM_PIN);
     }
 
-    if(p[0]) { 
-      output_pins |= C64_PLA_F_BASIC_ROM; 
+    if(!(p[0])) {  
+      output8_set_pin(&output_pins, LO, C64_PLA_F_BASIC_ROM_PIN);
     }
-    if(p[1] || p[2]) { 
-      output_pins |= C64_PLA_F_KERNAL_ROM;
+    if(!(p[1] || p[2])) {
+      output8_set_pin(&output_pins, LO, C64_PLA_F_KERNAL_ROM_PIN);
     }
-    if(p[3] || p[4] || p[5] || p[6] || p[7]) { 
-      output_pins |= C64_PLA_F_CHAROM; 
+    if(!(p[3] || p[4] || p[5] || p[6] || p[7])) { 
+      output8_set_pin(&output_pins, LO, C64_PLA_F_CHAROM_PIN);
     }
 
-    if(p[31]) { 
-      output_pins |= C64_PLA_F_GRW;
+    if(!(p[31])) { 
+      output8_set_pin(&output_pins, HI, C64_PLA_F_GRW_PIN);
     }
-    if(p[9] || p[10] || p[11] || p[12] || p[13] || p[14] || p[15] || p[16] || p[17] || p[18]) { 
-      output_pins |= C64_PLA_F_IO;
+    if(!(p[9] || p[10] || p[11] || p[12] || p[13] || p[14] || p[15] || p[16] || p[17] || p[18])) { 
+      output8_set_pin(&output_pins, LO, C64_PLA_F_IO_PIN);
     }
-    if(p[19] ||  p[20]) {
-      output_pins |= C64_PLA_F_ROML; 
+    if(!(p[19] ||  p[20])) {
+      output8_set_pin(&output_pins, LO, C64_PLA_F_ROML_PIN);
     } 
-    if(p[21] || p[22] || p[23]) {
-      output_pins |= C64_PLA_F_ROMH;
+    if(!(p[21] || p[22] || p[23])) {
+      output8_set_pin(&output_pins, LO, C64_PLA_F_ROMH_PIN);
     }
 
     pla->pla_lut[i] = output_pins;
@@ -136,24 +189,41 @@ c64_pla_t *pla_init(void) {
   
   return pla;
 }
-
-uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins) {
+/*
+uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins, uint64_t vic_pins, uint64_t cia_pins) {
 
   uint64_t temp_pins = 0;
+  vic_pins = cia_pins = 0;
 
-  if(cpu_pins & (1 << 11)) { temp_pins |= C64_PLA_A12; }
-  if(cpu_pins & (1 << 12)) { temp_pins |= C64_PLA_A13; }
-  if(cpu_pins & (1 << 13)) { temp_pins |= C64_PLA_A14; }
-  if(cpu_pins & (1 << 14)) { temp_pins |= C64_PLA_A15; }
+  if(cpu_pins & (1ULL << 12)) { temp_pins |= C64_PLA_A12; }
+  if(cpu_pins & (1ULL << 13)) { temp_pins |= C64_PLA_A13; }
+  if(cpu_pins & (1ULL << 14)) { temp_pins |= C64_PLA_A14; }
+  if(cpu_pins & (1ULL << 15)) { temp_pins |= C64_PLA_A15; }
 
+  // Do all of this with pin_check functions please!
   if(cpu_pins & M6510_RW) { temp_pins |= C64_PLA_I_RW; }
   if(cpu_pins & M6510_P0) { temp_pins |= C64_PLA_I_LORAM; }
   if(cpu_pins & M6510_P1) { temp_pins |= C64_PLA_I_HIRAM; }
   if(cpu_pins & M6510_P2) { temp_pins |= C64_PLA_I_CHAREN; }
+  // The AEC pin on the 6510 and PLA are both input signals,
+  // The 6510 AEC pin is the Bus Control pin, while the PLA AEC pin is the address decoder.
+  // Since all our pins are active-HIGH, when the AEC chip is active, the CPU controls it.
+  // The VIC-II controls the AEC when the pin is LOW..
   if(cpu_pins & M6510_AEC) { temp_pins |= C64_PLA_I_AEC; }
 
-  uint8_t output_pins = pla->pla_lut[temp_pins & 0xFFFF];
-  pla->pla_pins |= (temp_pins | output_pins);
+  temp_pins |= C64_PLA_I_CAS;
+
+  // if(vic_pins & V6569_BA) { temp_pins |= C64_PLA_I_BA; }
+
+  //if(cia_pins & C6526_VA14) { temp_pins |= C64_PLA_VA14_PIN; }
+ 
+  uint8_t output_pins = pla->pla_lut[(temp_pins >> 8) & 0xFF];
 
   return output_pins;
+}
+*/
+
+
+uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins, uint64_t vic_pins, uint64_t cia_pins) {
+
 }

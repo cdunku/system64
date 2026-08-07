@@ -56,7 +56,7 @@ typedef struct {
   void (*instr)(m65xx_t*); 
 } m65xx_opcodes_t;
 
-extern m65xx_opcodes_t m6502_opcode_table[0x103];
+extern const m65xx_opcodes_t m6502_opcode_table[0x103];
 
 void m6510_tick(m65xx_t* const m);
 m65xx_t *m6510_init(void);
