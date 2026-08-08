@@ -72,7 +72,7 @@ static int m65xx_harte_tests(m65xx_t* m, char *file) {
 
     // Gets the tests name, and initialises "initial" and "final" states
 
-    char *name = json_string_value(json_object_get(test, "name"));
+    const char *name = json_string_value(json_object_get(test, "name"));
     json_t *initial = json_object_get(test, "initial");
     json_t* final = json_object_get(test, "final");
 

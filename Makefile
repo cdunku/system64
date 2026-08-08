@@ -6,7 +6,7 @@ BIN := sea64
 STD := -std=c2x
 WARN := -Wall -Wextra -Wpedantic
 
-INCLUDES := $(addprefix -I,$(shell find include -type d))
+INCLUDES := $(addprefix -I,$(shell find include tests -type d))
 LIBS := `pkg-config --cflags --libs sdl3`
 
 # Find all application sources and filter out main.c
@@ -51,4 +51,5 @@ tests/%: tests/%.c $(APP_OBJS)
 # Clean
 clean:
 	@echo "[cleaned]"
-	@rm -rf $(APP_OBJS) $(MAIN_OBJ) $(BIN) $(TEST_BINS) *.gch ncore.* 2>/dev/null || true
+	@rm -rf $(BIN) $(TEST_BINS) *.gch ncore.* 2>/dev/null || true
+	@find src tests -name '*.o' -type f -delete 2>/dev/null || true
