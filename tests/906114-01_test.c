@@ -5,64 +5,48 @@
 #include "906114-01_bus.h"
 #include "6510_bus.h"
 
-/*
-uint8_t zero_page_and_stack_acces_test(c64_pla_t *pla, m65xx_t* m) {
-  
-  m6510_pin_on(m, M6510_P0);
-  m6510_pin_on(m, M6510_P1);
-  m6510_pin_on(m, M6510_P2);
-
-  m6510_pin_on(m, M6510_RW);
-  m6510_pin_on(m, M6510_AEC);
-
-  pla_pin_on(pla, C64_PLA_I_EXROM9);
-  pla_pin_on(pla, C64_PLA_I_GAME8);
-  pla_pin_on(pla, C64_PLA_I_CAS);
-
-  m6510_set_abus(m, 0x0000);
-
-  uint8_t decoded = pla_decode(pla, m->m6510_pins, 0, 0);
-
-  assert((decoded & C64_PLA_F_CASRAM) != 0);
-  assert((decoded & C64_PLA_F_BASIC_ROM) == 0);
-  assert((decoded & C64_PLA_F_KERNAL_ROM) == 0);
-  assert((decoded & C64_PLA_F_CHAROM) == 0);
-  assert((decoded & C64_PLA_F_IO) == 0);
-  assert((decoded & C64_PLA_F_ROML) == 0);
-  assert((decoded & C64_PLA_F_ROMH) == 0);
-
-
-  fprintf(stderr, "Zero Page (0x0000) passes the test\n");
-
-  m->m6510_pins = 0;
-  pla->pla_pins = 0;
-
-  m6510_pin_on(m, M6510_P0);
-  m6510_pin_on(m, M6510_P1);
-  m6510_pin_on(m, M6510_P2);
-
-  m6510_pin_on(m, M6510_RW);
-
-  pla_pin_on(pla, C64_PLA_I_EXROM9);
-  pla_pin_on(pla, C64_PLA_I_GAME8);
-  pla_pin_on(pla, C64_PLA_I_CAS);
-
-  m6510_set_abus(m, 0x0080);
-
-  decoded = pla_decode(pla, m->m6510_pins, 0, 0);
-
-  assert((decoded & C64_PLA_F_CASRAM) != 0);
-  assert((decoded & C64_PLA_F_BASIC_ROM) == 0);
-  assert((decoded & C64_PLA_F_KERNAL_ROM) == 0);
-  assert((decoded & C64_PLA_F_CHAROM) == 0);
-  assert((decoded & C64_PLA_F_IO) == 0);
-  assert((decoded & C64_PLA_F_ROML) == 0);
-  assert((decoded & C64_PLA_F_ROMH) == 0);
-
-
-  fprintf(stderr, "Zero Page (0x0080) passes the test\n");
+static inline bool output8_check_pin(uint8_t pins, uint8_t pin) {
+  const pin_state_table_t *table = pla_pin_state_table; 
+  return (((uint8_t)table[pin].active << pin) == (pins & PINMASK(pin)));
 }
 
+void zero_page_and_stack_acces_test(c64_pla_t *pla, m65xx_t* m) {
+ 
+  uint16_t target_addr = 0x1FFF;
+  uint8_t decoded = 0;
+
+  for(uint16_t addr = 0x0000; addr <= target_addr; addr++) {
+
+    m6510_set_abus(m, addr);
+    m6510_set_pin(m, HI, M6510_P0_PIN);
+    m6510_set_pin(m, HI, M6510_P1_PIN);
+    m6510_set_pin(m, HI, M6510_P2_PIN);
+
+    m6510_set_pin(m, HI, M6510_RW_PIN);
+    m6510_set_pin(m, HI, M6510_AEC_PIN);
+
+    pla_set_pin(pla, LO, C64_PLA_I_EXROM9_PIN);
+    pla_set_pin(pla, LO, C64_PLA_I_GAME8_PIN);
+    pla_set_pin(pla, LO, C64_PLA_I_CAS_PIN);
+
+    decoded = pla_decode(pla, m->m6510_pins, 0, 0);
+
+    assert(output8_check_pin(decoded, C64_PLA_F_CASRAM_PIN) != 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_BASIC_ROM_PIN) == 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_KERNAL_ROM_PIN) == 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_CHAROM_PIN) == 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_IO_PIN) == 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_ROML_PIN) == 0);
+    assert(output8_check_pin(decoded, C64_PLA_F_ROMH_PIN) == 0);
+
+    pla->pla_pins = 0;
+
+  }
+
+  fprintf(stderr, "(0x0000 - 0x1FFF): Zero Page and Stack PLA accesses pass the test\n");
+}
+
+/*
 uint8_t kernal_rom_access_test(c64_pla_t *pla, m65xx_t* m) {
     // Reset state
     m->m6510_pins = 0;
@@ -109,7 +93,7 @@ int main(void) {
   c64_pla_t *pla = pla_init();
   m65xx_t *m = m6510_init();
 
-  // zero_page_and_stack_acces_test(pla, m);
+  zero_page_and_stack_acces_test(pla, m);
 
   //kernal_rom_access_test(pla, m);
   free(pla);

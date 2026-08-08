@@ -66,7 +66,7 @@ typedef struct {
 extern const pin_state_table_t pla_pin_state_table[26];
 
 void pla_set_pin(c64_pla_t *pla, PIN_ACTIVITY_STATE state, uint64_t pin);
-bool pla_pin_check(c64_pla_t *pla, uint64_t pin);
+bool pla_check_pin(c64_pla_t *pla, uint64_t pin);
 
 c64_pla_t *pla_init(void);
 uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins, uint64_t vic_pins, uint64_t cia_pins);

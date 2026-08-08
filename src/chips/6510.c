@@ -2376,7 +2376,7 @@ void m6510_tick(m65xx_t* const m) {
   if(m6510_check_pin(m, M6510_SYNC_PIN)) {
     
     m6510_set_pin(m, LO, M6510_SYNC_PIN);
- 
+/* 
     // Logic for executing interrupts here
     if(m6510_check_pin(m, M6510_RES_PIN)) {
       m->ir = M6510_RES_OPCODE;
@@ -2396,6 +2396,10 @@ void m6510_tick(m65xx_t* const m) {
       m->ir = m6510_get_dbus(m);
       m->pc++; 
     }
+    */ 
+
+    m->ir = m6510_get_dbus(m);
+    m->pc++;
     m->cpu_instr_done = 0;
   }
 

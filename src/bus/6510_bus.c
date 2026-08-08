@@ -67,11 +67,11 @@ uint8_t m6510_get_dbus(const m65xx_t* m) {
 }
 
 void m6510_set_pin(m65xx_t* m, PIN_ACTIVITY_STATE state, uint64_t pin) {
-  set_pin(&m->m6510_pins, m6510_pin_state_table, state, pin);
+  set_pin_voltage(&m->m6510_pins, state, pin);
 }
 
 bool m6510_check_pin(const m65xx_t *m, uint64_t pin) {
-  return pin_check(m->m6510_pins, m6510_pin_state_table, pin);
+  return is_pin_asserted(m->m6510_pins, m6510_pin_state_table, pin);
 }
 
 void m6510_set_port(m65xx_t* const m) {
