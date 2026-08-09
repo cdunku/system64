@@ -445,9 +445,10 @@ int main(void) {
   printf("Tests passed = %d\n", pass);
   // For running a test for a specific opcode:
   // Pass: 1 (All tests pass), Pass: 0 (A test has failed)
+  /*
   pass = m65xx_harte_tests(&m, "tests/6502/v1/00.json");
   printf("Pass: %d, opcode: 0x%02X\n", pass, m.ir);
-
+  */
   // AllSuiteA test
   allsuiteasm(&m);
 

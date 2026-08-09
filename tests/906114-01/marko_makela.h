@@ -1,5 +1,15 @@
 #pragma once
 
+/**
+ * The following code has been modified and taken from the following link:
+ * https://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/pla.c
+ * 
+ * I do not own, nor claim to own that the code below belongs to me.
+ * The following code was used to test my PLA lookup table.
+**/
+
+
+
 /** Program to convert logic equations
  * of 16 inputs and 8 outputs
  * to a 64-kilobyte truth table.
@@ -41,22 +51,23 @@
  * from 0 to 15, or 0 to 7, respectively.)
  */
 /*@{*/
-#define CAS_	I(7)
-#define LORAM_	I(8)
-#define HIRAM_	I(9)
-#define CHAREN_	I(10)
-#define VA14_	I(6)
-#define A15	I(3)
-#define A14	I(2)
-#define A13	I(1)
-#define A12	I(0)
-#define BA	I(13)
-#define AEC_	I(14)
-#define R_W_	I(15)
-#define EXROM_	I(12)
-#define GAME_	I(11)
-#define VA13	I(5)
+
+#define A12	    I(0)
+#define A13	    I(1)
+#define A14	    I(2)
+#define A15	    I(3)
 #define VA12	I(4)
+#define VA13	I(5)
+#define VA14_	!I(6)
+#define CAS_	!I(7)
+#define LORAM_	!I(8)
+#define HIRAM_	!I(9)
+#define CHAREN_	!I(10)
+#define GAME_	!I(11)
+#define EXROM_	!I(12)
+#define BA	    I(13)
+#define AEC_	!I(14)
+#define R_W_	I(15)
 /*@}*/
 
 /** @name The output signals of the Commodore 64 PLA.
