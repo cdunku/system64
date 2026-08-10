@@ -3,28 +3,28 @@
 
 typedef struct {
 
-  uint64_t cia_pins;
+  uint64_t c6526_pins;
 
-  uint8_t pra;
-  uint8_t prb;
+  uint8_t pra; // Peripheral Data Register A 
+  uint8_t prb; // Peripheral Data Register B
 
-  uint8_t ddra;
-  uint8_t ddrb;
+  uint8_t ddra; // Data Direction Register A
+  uint8_t ddrb; // Data Direction Register B
 
-  uint16_t talo;
-  uint16_t tahi;
-  uint16_t tblo;
-  uint16_t tbhi;
+  uint16_t talo; // Timer A Low Register
+  uint16_t tahi; // Timer A High Register
+  uint16_t tblo; // Timer B Low Register
+  uint16_t tbhi; // Timer B High Register
 
-  uint8_t tod_10th;
-  uint8_t tod_sec;
-  uint8_t tod_min;
-  uint8_t tod_hr;
+  uint8_t tod_10th; // 10ths of seconds Register
+  uint8_t tod_sec; // Seconds Register
+  uint8_t tod_min; // Minutes Register
+  uint8_t tod_hr; // Hours -- AM/PM Register
 
-  uint8_t sdr;
-  uint8_t icr;
+  uint8_t sdr; // Serial Data Register
+  uint8_t icr; // Interrupt Control Register
 
-  uint8_t cra;
-  uint8_t crb;
+  uint8_t cra; // Control Register A
+  uint8_t crb; // Control Register B
 
-} cia_t;
+} c6526_t;
