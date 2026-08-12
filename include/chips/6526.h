@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 
 typedef struct {
 
@@ -22,9 +23,35 @@ typedef struct {
   uint8_t tod_hr; // Hours -- AM/PM Register
 
   uint8_t sdr; // Serial Data Register
+  
   uint8_t icr; // Interrupt Control Register
-
   uint8_t cra; // Control Register A
   uint8_t crb; // Control Register B
 
 } c6526_t;
+
+
+typedef enum {
+  
+  DATA_PORT_A = 0,
+  DATA_PORT_B,
+  DATA_DIRECTION_PORT_A,
+  DATA_DIRECTION_PORT_B,
+  
+  TIMER_A_LOW_BYTE,
+  TIMER_A_HIGH_BYTE,
+  TIMER_B_LOW_BYTE,
+  TIMER_B_HIGH_BYTE,
+  
+  REAL_TIME_CLOCK_TENTH,
+  REAL_TIME_CLOCK_SECONDS,
+  REAL_TIME_CLOCK_MINUTES,
+  REAL_TIME_CLOCK_HOURS,
+  
+  SERIAL_SHIFT_REGISTER,
+
+  INTERRUPT_CONTROL_REGISTER,
+  CONTROL_TIMER_A,
+  CONTROL_TIMER_B,
+
+} C6562_REGISTER_SELECT;

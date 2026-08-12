@@ -1,7 +1,7 @@
 #include "6510.h"
 #include "6510_bus.h"
 
-const pin_state_table_t m6510_pin_state_table[38] =  {
+const pin_state_table_t m6510_pin_state_table[M6510_PINS_AMOUNT] =  {
 
   [M6510_A0_PIN]   = { .active = HI, .inactive = LO },
   [M6510_A1_PIN]   = { .active = HI, .inactive = LO },
@@ -49,21 +49,21 @@ const pin_state_table_t m6510_pin_state_table[38] =  {
 
 
 void m6510_set_abus(m65xx_t* m, uint16_t addr) { 
-  set_abus(&m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT, addr); 
+  set_16bit(&m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT, addr); 
 }
 void m6510_set_dbus(m65xx_t* m, uint8_t data) {
-  set_dbus(&m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT, data);
+  set_8bit(&m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT, data);
 }
 void m6510_set_abus_dbus(m65xx_t* m, uint16_t addr, uint8_t data) {
-  set_abus(&m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT, addr); 
-  set_dbus(&m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT, data);
+  set_16bit(&m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT, addr); 
+  set_8bit(&m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT, data);
 }
 
 uint16_t m6510_get_abus(const m65xx_t* m) {
-  return get_abus(m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT);
+  return get_16bit(m->m6510_pins, M6510_ABUS_MASK, M6510_ABUS_SHIFT);
 }
 uint8_t m6510_get_dbus(const m65xx_t* m) {
-  return get_dbus(m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT);
+  return get_8bit(m->m6510_pins, M6510_DBUS_MASK, M6510_DBUS_SHIFT);
 }
 
 void m6510_set_pin(m65xx_t* m, PIN_ACTIVITY_STATE state, uint64_t pin) {

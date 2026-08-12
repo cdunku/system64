@@ -28,19 +28,19 @@ typedef struct {
 } pin_state_table_t;
 
 
-static inline uint16_t get_abus(uint64_t pins, uint64_t mask, unsigned shift) {
+static inline uint16_t get_16bit(uint64_t pins, uint64_t mask, unsigned shift) {
   return (uint16_t)((pins & mask) >> shift);
 }
 
-static inline uint8_t get_dbus(uint64_t pins, uint64_t mask, unsigned shift) {
+static inline uint8_t get_8bit(uint64_t pins, uint64_t mask, unsigned shift) {
   return (uint8_t)((pins & mask) >> shift);
 }
 
-static inline void set_abus(uint64_t *pins, uint64_t mask, unsigned shift, uint16_t addr) {
+static inline void set_16bit(uint64_t *pins, uint64_t mask, unsigned shift, uint16_t addr) {
   *pins = (*pins & ~mask) | (((uint64_t)addr << shift) & mask);
 }
 
-static inline void set_dbus(uint64_t *pins, uint64_t mask, unsigned shift, uint8_t data) {
+static inline void set_8bit(uint64_t *pins, uint64_t mask, unsigned shift, uint8_t data) {
   *pins = (*pins & ~mask) | (((uint64_t)data << shift) & mask);
 }
 

@@ -3,8 +3,9 @@
 #include "6510.h"
 #include "bus_template.h"
 
-typedef struct m65xx_t m65xx_t;
+#define M6510_PINS_AMOUNT 38
 
+typedef struct m65xx_t m65xx_t;
 
 typedef enum M6510_PINOUT {
 
@@ -65,7 +66,7 @@ typedef enum M6510_PINOUT {
 } M6510_PINOUT;
 
 
-extern const pin_state_table_t m6510_pin_state_table[38];
+extern const pin_state_table_t m6510_pin_state_table[M6510_PINS_AMOUNT];
 
 // This are the floating or unused bits (6 and 7).
 static const uint8_t FLOATING_IO_PINS_MASK = 0xC0;

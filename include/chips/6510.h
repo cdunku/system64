@@ -51,7 +51,7 @@ typedef struct m65xx_t {
 
 } m65xx_t;
 
-typedef struct { 
+typedef struct m65xx_opcodes_t { 
   void (*mode)(m65xx_t*); 
   void (*instr)(m65xx_t*); 
 } m65xx_opcodes_t;

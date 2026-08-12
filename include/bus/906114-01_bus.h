@@ -7,7 +7,7 @@
 #define LUT_SIZE 0x10000
 #define PLA_PINS_AMOUNT 26
 
-typedef enum {
+typedef enum C64_PLA_PINOUT {
 
   C64_PLA_FIELD_SHIFT = 0,
   C64_PLA_ABUS_SHIFT = 8,
@@ -57,7 +57,7 @@ typedef enum {
 } C64_PLA_PINOUT;
 
 
-typedef struct {
+typedef struct c64_pla_t {
 
   uint8_t pla_lut[LUT_SIZE];
   uint64_t pla_pins;

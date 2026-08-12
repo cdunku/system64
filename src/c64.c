@@ -4,7 +4,6 @@
 
 #include "c64.h"
 #include "c64_bus.h"
-#include "c64_bus_helpers.h"
 
 static uint8_t c64_port_in(void *user_data);
 static void c64_port_out(uint8_t data, void *user_data);
