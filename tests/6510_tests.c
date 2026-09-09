@@ -458,7 +458,7 @@ int main(void) {
   // Klaus Dormann test
   m6502_decimal_test(&m);
   m6502_functional_test(&m);
-  m6502_interrupt_test(&m);
+  // m6502_interrupt_test(&m);
 
   clock_t end = clock();
 

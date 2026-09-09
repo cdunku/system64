@@ -1,4 +1,4 @@
-.PHONY: all production release tests clean
+.PHONY: all production release tests bench clean
 
 CC := clang
 BIN := sea64
@@ -36,6 +36,10 @@ release: $(BIN)
 tests: CFLAGS := -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer $(STD) $(WARN) $(INCLUDES)
 tests: LDFLAGS := -ljansson -fsanitize=address,undefined $(LIBS)
 tests: $(TEST_BINS)
+
+bench: CFLAGS := -O3 -DNDEBUG -g $(STD) $(WARN) $(INCLUDES)
+bench: LDFLAGS := -ljansson $(LIBS)
+bench: $(TEST_BINS)
 
 # Main Binary Link Rule
 $(BIN): $(APP_OBJS) $(MAIN_OBJ)

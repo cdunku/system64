@@ -56,7 +56,7 @@ typedef enum C6526_PINOUT {
   C6526_RS2_PIN,
   C6526_RS3_PIN,
 
-  C6526_PC_PIN, // Port Control (Handshaking)
+  C6526_PC_PIN, // Port Control
   C6526_TOD_PIN, // Time of Day
  
   C6526_IRQ_PIN, // IRQ (connected to the CPU)
@@ -67,22 +67,22 @@ typedef enum C6526_PINOUT {
   C6526_RES_PIN, // Reset pin
   C6526_SP_PIN, // Serial port
 
-  C6526_NT_PIN, // Counter
+  C6526_CNT_PIN, // Counter
 
 } C6526_PINOUT;
 
-extern const pin_state_table_t c6526_pin_state_table[C6526_PINS_AMOUNT];
+extern const pin_active_state_t c6526_pin_active_state[C6526_PINS_AMOUNT];
 
 void c6526_set_pin(c6526_t *cia, PIN_ACTIVITY_STATE, uint64_t pin);
 bool c6526_check_pin(c6526_t* cia, uint64_t pin);
 
-uint8_t c6526_pa_get(c6526_t* cia);
-uint8_t c6526_pb_get(c6526_t* cia);
-uint8_t c6526_rs_get(c6526_t* cia);
-uint8_t c6526_dbus_get(c6526_t* cia);
+uint8_t c6526_get_pa(c6526_t* cia);
+uint8_t c6526_get_pb(c6526_t* cia);
+uint8_t c6526_get_rs(c6526_t* cia);
+uint8_t c6526_get_dbus(c6526_t* cia);
 
-void c6526_pa_set(c6526_t* cia, uint8_t data);
-void c6526_pb_set(c6526_t* cia, uint8_t data);
-void c6526_rs_set(c6526_t* cia, uint8_t data);
-void c6526_dbus_set(c6526_t* cia, uint8_t data);
+void c6526_set_pa(c6526_t* cia, uint8_t data);
+void c6526_set_pb(c6526_t* cia, uint8_t data);
+void c6526_set_rs(c6526_t* cia, uint8_t data);
+void c6526_set_dbus(c6526_t* cia, uint8_t data);
 

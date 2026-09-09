@@ -65,7 +65,7 @@ typedef enum M6510_PINOUT {
 } M6510_PINOUT;
 
 
-extern const pin_state_table_t m6510_pin_state_table[38];
+extern const pin_active_state_t m6510_pin_active_state[38];
 
 // This are the floating or unused bits (6 and 7).
 static const uint8_t FLOATING_IO_PINS_MASK = 0xC0;

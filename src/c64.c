@@ -97,15 +97,3 @@ void c64_run(c64_t* c64) {
 
   return;
 }
-
-
-static uint8_t c64_port_in(void *user_data) {
-  c64_t *c64 = (c64_t*) user_data;
-  uint8_t data = 0;
-
-  return data;
-}
-static void c64_port_out(uint8_t data, void *user_data) {
-  c64_t *c64 = (c64_t*) user_data;
-  data = 0;
-}

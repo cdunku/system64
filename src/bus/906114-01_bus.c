@@ -11,7 +11,7 @@ void pla_set_pin(c64_pla_t *pla, PIN_ACTIVITY_STATE state, uint64_t pin) {
   set_pin_voltage(&pla->pla_pins, state, pin);
 }
 bool pla_is_pin_asserted(c64_pla_t *pla, uint64_t pin) {
-  return is_pin_asserted(pla->pla_pins, pla_pin_state_table, pin);
+  return is_pin_asserted(pla->pla_pins, pla_pin_active_state, pin);
 }
 
 // Sets the output pins after checking input combinations
@@ -24,40 +24,40 @@ static inline void output8_set_pin(uint8_t *pins8, PIN_ACTIVITY_STATE state, uin
   }
 }
 
-const pin_state_table_t pla_pin_state_table[PLA_PINS_AMOUNT] = {
+const pin_active_state_t pla_pin_active_state[PLA_PINS_AMOUNT] = {
 
-  [C64_PLA_F_CASRAM_PIN]     = { .active = LO, .inactive = HI },
-  [C64_PLA_F_BASIC_ROM_PIN]  = { .active = LO, .inactive = HI },
-  [C64_PLA_F_KERNAL_ROM_PIN] = { .active = LO, .inactive = HI },
-  [C64_PLA_F_CHAROM_PIN]     = { .active = LO, .inactive = HI },
-  [C64_PLA_F_GRW_PIN]        = { .active = HI, .inactive = LO },
-  [C64_PLA_F_IO_PIN]         = { .active = LO, .inactive = HI },
-  [C64_PLA_F_ROML_PIN]       = { .active = LO, .inactive = HI },
-  [C64_PLA_F_ROMH_PIN]       = { .active = LO, .inactive = HI },
+  [C64_PLA_F_CASRAM_PIN]     = { .active = LO },
+  [C64_PLA_F_BASIC_ROM_PIN]  = { .active = LO },
+  [C64_PLA_F_KERNAL_ROM_PIN] = { .active = LO },
+  [C64_PLA_F_CHAROM_PIN]     = { .active = LO },
+  [C64_PLA_F_GRW_PIN]        = { .active = HI },
+  [C64_PLA_F_IO_PIN]         = { .active = LO },
+  [C64_PLA_F_ROML_PIN]       = { .active = LO },
+  [C64_PLA_F_ROMH_PIN]       = { .active = LO },
 
-  [C64_PLA_A12_PIN]          = { .active = HI, .inactive = LO },
-  [C64_PLA_A13_PIN]          = { .active = HI, .inactive = LO },
-  [C64_PLA_A14_PIN]          = { .active = HI, .inactive = LO },
-  [C64_PLA_A15_PIN]          = { .active = HI, .inactive = LO },
+  [C64_PLA_A12_PIN]          = { .active = HI },
+  [C64_PLA_A13_PIN]          = { .active = HI },
+  [C64_PLA_A14_PIN]          = { .active = HI },
+  [C64_PLA_A15_PIN]          = { .active = HI },
 
-  [C64_PLA_VA12_PIN]         = { .active = HI, .inactive = LO },
-  [C64_PLA_VA13_PIN]         = { .active = HI, .inactive = LO },
-  [C64_PLA_VA14_PIN]         = { .active = LO, .inactive = HI },
+  [C64_PLA_VA12_PIN]         = { .active = HI },
+  [C64_PLA_VA13_PIN]         = { .active = HI },
+  [C64_PLA_VA14_PIN]         = { .active = LO },
 
-  [C64_PLA_I_CAS_PIN]        = { .active = LO, .inactive = HI },
-  [C64_PLA_I_LORAM_PIN]      = { .active = LO, .inactive = HI },
-  [C64_PLA_I_HIRAM_PIN]      = { .active = LO, .inactive = HI },
-  [C64_PLA_I_CHAREN_PIN]     = { .active = LO, .inactive = HI },
+  [C64_PLA_I_CAS_PIN]        = { .active = LO },
+  [C64_PLA_I_LORAM_PIN]      = { .active = LO },
+  [C64_PLA_I_HIRAM_PIN]      = { .active = LO },
+  [C64_PLA_I_CHAREN_PIN]     = { .active = LO },
 
-  [C64_PLA_I_GAME8_PIN]      = { .active = LO, .inactive = HI },
-  [C64_PLA_I_EXROM9_PIN]     = { .active = LO, .inactive = HI },
+  [C64_PLA_I_GAME8_PIN]      = { .active = LO },
+  [C64_PLA_I_EXROM9_PIN]     = { .active = LO },
 
-  [C64_PLA_I_BA_PIN]         = { .active = HI, .inactive = LO },
-  [C64_PLA_I_AEC_PIN]        = { .active = LO, .inactive = HI },
-  [C64_PLA_I_RW_PIN]         = { .active = HI, .inactive = LO },
+  [C64_PLA_I_BA_PIN]         = { .active = HI },
+  [C64_PLA_I_AEC_PIN]        = { .active = LO },
+  [C64_PLA_I_RW_PIN]         = { .active = HI },
 
-  [C64_PLA_FE_PIN]           = { .active = HI, .inactive = LO },
-  [C64_PLA_CE_PIN]           = { .active = LO, .inactive = HI },
+  [C64_PLA_FE_PIN]           = { .active = HI },
+  [C64_PLA_CE_PIN]           = { .active = LO },
 
 };
 
@@ -221,7 +221,7 @@ uint8_t pla_decode(c64_pla_t *pla, uint64_t cpu_pins, uint64_t vic_pins, uint64_
 
   vic_pins = cia_pins = 0;
 
-  const pin_state_table_t *cpu_table = m6510_pin_state_table;
+  const pin_active_state_t *cpu_table = m6510_pin_active_state;
 
   if(is_pin_asserted(cpu_pins, cpu_table, M6510_A12_PIN)) { pla_set_pin(pla, HI, C64_PLA_A12_PIN); }
   if(is_pin_asserted(cpu_pins, cpu_table, M6510_A13_PIN)) { pla_set_pin(pla, HI, C64_PLA_A13_PIN); }

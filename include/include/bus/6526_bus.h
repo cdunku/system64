@@ -70,7 +70,7 @@ typedef enum {
 
 } CIA_PINOUT;
 
-pin_state_table_t c6526_pin_state_table[C6526_PINS_AMOUNT];
+pin_active_state_t c6526_pin_active_state[C6526_PINS_AMOUNT];
 
 
 

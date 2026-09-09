@@ -1,49 +1,49 @@
 #include "6510.h"
 #include "6510_bus.h"
 
-const pin_state_table_t m6510_pin_state_table[M6510_PINS_AMOUNT] =  {
+const pin_active_state_t m6510_pin_active_state[M6510_PINS_AMOUNT] =  {
 
-  [M6510_A0_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A1_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A2_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A3_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A4_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A5_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A6_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A7_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A8_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A9_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_A10_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_A11_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_A12_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_A13_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_A14_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_A15_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_A0_PIN]   = { .active = HI },
+  [M6510_A1_PIN]   = { .active = HI },
+  [M6510_A2_PIN]   = { .active = HI },
+  [M6510_A3_PIN]   = { .active = HI },
+  [M6510_A4_PIN]   = { .active = HI },
+  [M6510_A5_PIN]   = { .active = HI },
+  [M6510_A6_PIN]   = { .active = HI },
+  [M6510_A7_PIN]   = { .active = HI },
+  [M6510_A8_PIN]   = { .active = HI },
+  [M6510_A9_PIN]   = { .active = HI },
+  [M6510_A10_PIN]  = { .active = HI },
+  [M6510_A11_PIN]  = { .active = HI },
+  [M6510_A12_PIN]  = { .active = HI },
+  [M6510_A13_PIN]  = { .active = HI },
+  [M6510_A14_PIN]  = { .active = HI },
+  [M6510_A15_PIN]  = { .active = HI },
 
-  [M6510_D0_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D1_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D2_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D3_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D4_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D5_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D6_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_D7_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_D0_PIN]   = { .active = HI },
+  [M6510_D1_PIN]   = { .active = HI },
+  [M6510_D2_PIN]   = { .active = HI },
+  [M6510_D3_PIN]   = { .active = HI },
+  [M6510_D4_PIN]   = { .active = HI },
+  [M6510_D5_PIN]   = { .active = HI },
+  [M6510_D6_PIN]   = { .active = HI },
+  [M6510_D7_PIN]   = { .active = HI },
 
-  [M6510_RDY_PIN]  = { .active = HI, .inactive = LO },
-  [M6510_RW_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_SYNC_PIN] = { .active = HI, .inactive = LO },
-  [M6510_AEC_PIN]  = { .active = HI, .inactive = LO },
+  [M6510_RDY_PIN]  = { .active = HI },
+  [M6510_RW_PIN]   = { .active = HI },
+  [M6510_SYNC_PIN] = { .active = HI },
+  [M6510_AEC_PIN]  = { .active = HI },
 
-  [M6510_NMI_PIN]  = { .active = LO, .inactive = HI },
-  [M6510_IRQ_PIN]  = { .active = LO, .inactive = HI },
-  [M6510_RES_PIN]  = { .active = LO, .inactive = HI },
+  [M6510_NMI_PIN]  = { .active = LO },
+  [M6510_IRQ_PIN]  = { .active = LO },
+  [M6510_RES_PIN]  = { .active = LO },
 
-  [M6510_P0_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_P1_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_P2_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_P3_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_P4_PIN]   = { .active = HI, .inactive = LO },
-  [M6510_P5_PIN]   = { .active = HI, .inactive = LO },
+  [M6510_P0_PIN]   = { .active = HI },
+  [M6510_P1_PIN]   = { .active = HI },
+  [M6510_P2_PIN]   = { .active = HI },
+  [M6510_P3_PIN]   = { .active = HI },
+  [M6510_P4_PIN]   = { .active = HI },
+  [M6510_P5_PIN]   = { .active = HI },
 
 };
 
@@ -71,7 +71,7 @@ void m6510_set_pin(m65xx_t* m, PIN_ACTIVITY_STATE state, uint64_t pin) {
 }
 
 bool m6510_check_pin(const m65xx_t *m, uint64_t pin) {
-  return is_pin_asserted(m->m6510_pins, m6510_pin_state_table, pin);
+  return is_pin_asserted(m->m6510_pins, m6510_pin_active_state, pin);
 }
 
 void m6510_set_port(m65xx_t* const m) {
@@ -84,6 +84,8 @@ void m6510_set_port(m65xx_t* const m) {
  * but I will try my best at documenting the following code block.
  */
 
+
+// MUST: Change extern device implementation into something else 
 
 void m6510_check_io_requests(m65xx_t* const m) {
 

@@ -25,7 +25,7 @@ typedef struct {
   bool active;
   bool inactive;
 
-} pin_state_table_t;
+} pin_active_state_t;
 
 
 static inline uint16_t get_16bit(uint64_t pins, uint64_t mask, unsigned shift) {
@@ -53,7 +53,7 @@ static inline void set_pin_voltage(uint64_t *pins, PIN_ACTIVITY_STATE state, uin
 }
 
 // Returns a 1 if the pin is active or a 0 if it is inactive
-static inline bool is_pin_asserted(uint64_t pins, const pin_state_table_t *table, uint64_t pin) { 
+static inline bool is_pin_asserted(uint64_t pins, const pin_active_state_t *table, uint64_t pin) { 
   return (pins & PINMASK(pin) ? HI : LO) == table[pin].active;
 }
 

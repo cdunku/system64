@@ -175,7 +175,7 @@ static inline void zpgr(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage read addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page read addressing mode\n");
       break;
     }
   }
@@ -201,7 +201,7 @@ static inline void zpgw(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page write addressing mode\n");
       break;
     }
   }
@@ -233,7 +233,7 @@ static inline void zpgm(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage read-modify-write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page read-modify-write addressing mode\n");
       break; 
     }
   }
@@ -264,7 +264,7 @@ static inline void zpxr(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, x read addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, x read addressing mode\n");
       break; 
     }
   }
@@ -295,7 +295,7 @@ static inline void zpxw(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, x write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, x write addressing mode\n");
       break; 
     }
   }
@@ -332,7 +332,7 @@ static inline void zpxm(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, x read-modify-write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, x read-modify-write addressing mode\n");
       break; 
     }
   }
@@ -363,7 +363,7 @@ static inline void zpyr(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, y read addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, y read addressing mode\n");
       break; 
     }
   }
@@ -394,7 +394,7 @@ static inline void zpyw(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, y write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, y write addressing mode\n");
       break; 
     }
   }
@@ -426,7 +426,7 @@ static inline void absr(m65xx_t* const m) {
       break;
     }
     default: {
-      printf(RED "Error:" RESET " invalid cycle count for zeropage, y read-modify-write addressing mode\n");
+      printf(RED "Error:" RESET " invalid cycle count for zero page, y read-modify-write addressing mode\n");
       break; 
     }
   }
@@ -2395,7 +2395,7 @@ void m6510_tick(m65xx_t* const m) {
     else {
       m->ir = m6510_get_dbus(m);
       m->pc++; 
-    }
+      }
     */ 
 
     m->ir = m6510_get_dbus(m);
