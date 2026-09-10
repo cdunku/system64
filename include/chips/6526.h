@@ -28,6 +28,9 @@ typedef struct c6526_timer_reg_t {
 
 typedef enum C6526_PIPELINE {
   
+
+  // Injections from COUNT_A0 to ONE_SHOT_B0 have been documented in Wolfgang's 6526 Software Model
+
   COUNT_A0    = (1ULL << 0),
   COUNT_A1    = (1ULL << 1),
   COUNT_A2    = (1ULL << 2),
@@ -48,15 +51,25 @@ typedef enum C6526_PIPELINE {
   PB_BIT7_HI  = (1ULL << 14),
   PB_BIT7_LO  = (1ULL << 15),
 
-  INTERRUPT_0 = (1ULL << 16),
-  INTERRUPT_1 = (1ULL << 17),
+  INT_ASSERT_0 = (1ULL << 16),
+  INT_ASSERT_1 = (1ULL << 17),
 
   ONE_SHOT_A0 = (1ULL << 18),
   ONE_SHOT_B0 = (1ULL << 19),
 
+  SET_ICR_0   = (1ULL << 20),
+  SET_ICR_1   = (1ULL << 21),
+
+  READ_ICR_0  = (1ULL << 22),
+  READ_ICR_1  = (1ULL << 23),
+
+  CLEAR_ICR_0 = (1ULL << 24),
+  CLEAR_ICR_1 = (1ULL << 25),
+  CLEAR_ICR_2 = (1ULL << 26),
+
 } C6526_PIPELINE;
 
-static const uint32_t C6526_TIMER_DELAY_MASK = (INTERRUPT_1 | PB_BIT7_LO | PB_BIT6_LO |
+static const uint32_t C6526_TIMER_DELAY_MASK = (INT_ASSERT_1 | PB_BIT7_LO | PB_BIT6_LO |
                                                 LOAD_B1 | LOAD_A1 | 
                                                 COUNT_B3 | COUNT_B2 | COUNT_B1 | 
                                                 COUNT_A3 | COUNT_A2 | COUNT_A1 );

@@ -303,6 +303,26 @@ static inline void crb_write(c6526_t* c, uint8_t data) {
   }
 }
 
+static inline uint8_t read_icr(c6526_t* c) {
+  uint8_t data = c->icr;
+
+
+
+  return data;
+}
+
+static inline void write_icr(c6526_t* c, uint8_t data) {
+  // The writing to the Interrupt Mask Register heavily depends on how the value is written.
+  // If bit 7 (in the IMR S/C) is 1 (Set), then it sets the 0-4 Bits the corresponding bits to 1.
+  // If bit 7 (in the IMR S/C) is 0 (Clear), then it clears the bits 0-4.
+  if(c->imr & IRQ_SC) {
+    c->imr = data & 0x1F;
+  }
+  else {
+    c->imr &= ~0x1F;
+  }
+}
+
 void c6526_write(c6526_t* c, uint16_t addr, uint8_t data) {
   uint8_t reg = c6526_get_rs(c);
 
@@ -571,7 +591,7 @@ static inline void tick_timer_pip(c6526_t* c) {
     // But since, we set the 0th bit of ICR, we just check for the 0th bit of IMR.
     if(c->imr & UNDERFLOW_TIMER_A) {
       // Interrupt is raised with one PHI2 delay.
-      set_pip_bit(&c->t->delay, INTERRUPT_0, 1);
+      set_pip_bit(&c->t->delay, INT_ASSERT_0, 1);
     }
   }
 
@@ -617,7 +637,7 @@ static inline void tick_timer_pip(c6526_t* c) {
 
     c->icr |= UNDERFLOW_TIMER_B;
     if(c->imr & UNDERFLOW_TIMER_B) {
-      set_pip_bit(&c->t->delay, INTERRUPT_0, 1);
+      set_pip_bit(&c->t->delay, INT_ASSERT_0, 1);
     }
   }
   
@@ -641,7 +661,7 @@ static inline void tick_timer_pip(c6526_t* c) {
 
   // In the schematic, a logic inversion occurs. Meaning that this is set to LOW.
   // Generating an interrupt signal to the CPU.
-  if(get_pip_bit(c->t->delay, INTERRUPT_1)) {
+  if(get_pip_bit(c->t->delay, INT_ASSERT_1)) {
     c->icr |= IRQ_SC;
   }
 
