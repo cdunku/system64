@@ -60,17 +60,53 @@ typedef enum C6526_PIPELINE {
   SET_ICR_0   = (1ULL << 20),
   SET_ICR_1   = (1ULL << 21),
 
-  READ_ICR_0  = (1ULL << 22),
-  READ_ICR_1  = (1ULL << 23),
+
+  /* 
+   * Source: Wolfgang's 6526 Software Model schematic
+   * t = underflow of timer occurred
+   * ICR Read occurred in t-1:
+   *
+   * ICR value = $00
+   * NMI executes: Yes
+   *
+   * The read happens before underflow.
+   * CPU reads $00 and next cycle underflow occurs.
+   * INT_ASSERT_0 gets feeded into the pipeline and next cycle interrupt is executed.
+   * 
+   *
+   * ICR Read occurred in t:
+   * ICR value = $01
+   * NMI executes: No 
+   *
+   * Read happened during underflow.
+   * CPU reads $01 from ICR, hence ICR = 0.
+   * ICR read during underflow permanently destroys pending interrupts.
+   *
+   *
+   * ICR Read occurred in t+1:
+   *
+   * ICR value = $81
+   * NMI executes: Yes 
+   *
+   * The read happens one cycle after the underflow.
+   * If INT_ASSERT_0 is 0 and corresponding bits of ICR and IMR are set, 
+   * it advances to INT_ASSERT_1 and the 7th bit is set.
+   * If INT_ASSERT_1 is advanced to, an interrupt will occur not matter if ICR is read,
+   * because the CPU locks in the 7th bit and the INT_ASSERT_1, pulling the IRQ pin LOW.
+   */
+  READ_ICR    = (1ULL << 22),
 
   CLEAR_ICR_0 = (1ULL << 24),
   CLEAR_ICR_1 = (1ULL << 25),
   CLEAR_ICR_2 = (1ULL << 26),
 
+  PULL_INT_HI = (1ULL << 27),
+
 } C6526_PIPELINE;
 
-static const uint32_t C6526_TIMER_DELAY_MASK = (INT_ASSERT_1 | PB_BIT7_LO | PB_BIT6_LO |
-                                                LOAD_B1 | LOAD_A1 | 
+static const uint32_t C6526_TIMER_DELAY_MASK = ( SET_ICR_0 | CLEAR_ICR_0 |
+                                                INT_ASSERT_1 | PB_BIT7_LO |
+                                                PB_BIT6_LO | LOAD_B1 | LOAD_A1 | 
                                                 COUNT_B3 | COUNT_B2 | COUNT_B1 | 
                                                 COUNT_A3 | COUNT_A2 | COUNT_A1 );
 

@@ -2334,7 +2334,7 @@ m65xx_t *m6510_init(void) {
   m6510_set_pin(m, LO, M6510_RES_PIN);
 
   m->s = 0xFD;
-  m->p |= 0x20;
+  m->p |= UF;
   m->ir = 0x00; 
 
   return m;
@@ -2358,25 +2358,23 @@ void m6510_tick(m65xx_t* const m) {
 
   // During every master cycle, the Commodore 64 must check for NMI edge cases,
   // even if the CPU stalled.
-  
-  /*
+ 
   if(m6510_check_pin(m, M6510_NMI_PIN) && m->nmi_previous_state == 0) { 
     m->nmi_edge_sensitive = 1; 
   }
-  if(() != m->nmi_previous_state) { 
-    m->nmi_previous_state = m->m6510_pins & M6510_NMI; 
+  if(m6510_check_pin(m, M6510_NMI_PIN) != m->nmi_previous_state) { 
+    m->nmi_previous_state = m6510_check_pin(m, M6510_NMI_PIN); 
   }
 
   if(m6510_check_pin(m, M6510_RW_PIN) && m6510_check_pin(m, M6510_RDY_PIN)) {
     m6510_set_port(m);
     return;
   }
-  */
 
   if(m6510_check_pin(m, M6510_SYNC_PIN)) {
     
     m6510_set_pin(m, LO, M6510_SYNC_PIN);
-/* 
+
     // Logic for executing interrupts here
     if(m6510_check_pin(m, M6510_RES_PIN)) {
       m->ir = M6510_RES_OPCODE;
@@ -2395,12 +2393,7 @@ void m6510_tick(m65xx_t* const m) {
     else {
       m->ir = m6510_get_dbus(m);
       m->pc++; 
-      }
-    */ 
-
-    m->ir = m6510_get_dbus(m);
-    m->pc++;
-    m->cpu_instr_done = 0;
+    }
   }
 
   m->tcu++;
@@ -2410,5 +2403,5 @@ void m6510_tick(m65xx_t* const m) {
   // Call instruction/addressing mode 
   m6502_opcode_table[m->ir].mode(m);
 
-  // if(m->interrupt_poll == true) { m6510_poll_interrupt_requests(m); }
+  if(m->interrupt_poll == true) { m6510_poll_interrupt_requests(m); }
 }

@@ -52,19 +52,7 @@ static inline void set_timer_idle(c6526_t *c) {
 }
 
 static inline void check_idle_state(c6526_t *c) {
-  if(c->t->is_idle) {
-    if(c->t->idle_master_cycles != 0) {
-      if((c->t->delay & COUNT_A3) != 0) {
-        c->t->treg->counter[A] -= c->t->idle_master_cycles; 
-      }
-      if((c->t->delay & COUNT_B3) != 0) {
-        c->t->treg->counter[B] -= c->t->idle_master_cycles; 
-      }
-      c->t->idle_master_cycles = 0;
-    }
-  }
-  c->t->is_idle = false;
-} 
+}
 
 static inline uint8_t read_pra(c6526_t* c) {
   c->pr_in[A] = (c6526_get_pa(c) & ~c->ddr[A]) | (c->pr[A] & c->ddr[A]);
@@ -76,8 +64,65 @@ static inline uint8_t read_prb(c6526_t *c) {
   c->pr_in[B] |= c->t->pb67_timer_output & c->t->pb67_timer_toggle;
   return c->pr_in[B];
 }
-static inline void write_pr(c6526_t* c, uint8_t data, C6526_REGISTER_SIDE s) {
+static inline void write_pra(c6526_t* c, uint8_t data) {
 
+}
+
+
+static inline uint8_t icr_read(c6526_t* c) {
+      
+  // An ICR read clears its contents.
+  // Only bit 7 (IRQ) is remembered.
+  uint8_t data = c->icr;
+  c->icr &= IRQ_SC;
+
+  // Signaling that ICR is read. 
+  // No interrupt can pend for the current and next clock cycle according to Wolfgang's schematic.
+  set_pip_bit(&c->t->delay, READ_ICR, 1);
+
+  // Signals that the ICR is cleared.
+  // In the first cycle the contents of ICR except bit 7 are cleared.
+  // In the second cycle IRQ bit gets cleared. 
+  set_pip_bit(&c->t->delay, CLEAR_ICR_0, 1);
+
+  // Pending interrupts are disabled during ICR reads.
+  set_pip_bit(&c->t->delay, INT_ASSERT_0, 0);
+  set_pip_bit(&c->t->delay, INT_ASSERT_0, 1);
+
+  // If the IRQ pin is asserted, it sets it back to high disablin the interrupt.
+  if(!c6526_check_pin(c, C6526_IRQ_PIN)) {
+    c6526_set_pin(c, C6526_IRQ_PIN, HI);
+  }
+
+  return data;
+}
+static inline void icr_write(c6526_t* c, uint8_t data) {
+
+  if(c->imr & IRQ_SC) {
+    c->imr = (data & 0x1F);
+  }
+  else {
+    c->imr &= ~0x1F;
+  }
+
+  // If corresponding ICR and IMR bits match and the IRQ pin is high
+  if(c->imr & c->icr && c6526_check_pin(c, C6526_IRQ_PIN)) {
+    set_pip_bit(&c->t->delay, INT_ASSERT_0, 1);
+    set_pip_bit(&c->t->delay, SET_ICR_0, 1);
+  }
+
+  // A read has occured 3 cycles ago, write electrically crashes into the clear wave.
+  // Permanently cancelling any pending interrupts.
+  //
+  // Resource: VirtualC64, Hoxs64 and Hoxs64 DD0DTest
+  //
+  // I have not verified if it truly happens in the real hardware.
+  if(get_pip_bit(c->t->delay, CLEAR_ICR_2)) {
+    set_pip_bit(&c->t->delay, INT_ASSERT_1, 0);
+    set_pip_bit(&c->t->delay, SET_ICR_1, 0);
+  }
+
+  // HANDSHAKE
 }
 
 static inline void cra_write(c6526_t* c, uint8_t data) {
@@ -377,6 +422,7 @@ void c6526_write(c6526_t* c, uint16_t addr, uint8_t data) {
       break;
     }
     case CONTROL_TIMER_B: {
+      crb_write(c, data);
       break;
     } 
     default: {
@@ -396,19 +442,18 @@ uint8_t c6526_read(c6526_t* c, uint16_t addr) {
     case DATA_PORT_B: {
       return read_prb(c);
     }
-    case DATA_DIRECTION_PORT_A: 
-    case DATA_DIRECTION_PORT_B: {
-
-      break;
+    case DATA_DIRECTION_PORT_A: {   
+    case DATA_DIRECTION_PORT_B:
+      return c->ddr[reg & 0x01];
     }
 
-    case TIMER_A_LOW_BYTE:
-    case TIMER_B_LOW_BYTE: {
-      break;                           
+    case TIMER_A_LOW_BYTE: {
+    case TIMER_B_LOW_BYTE:
+      return c->t->treg->counter_lo[reg & 0x01];                           
     }
-    case TIMER_A_HIGH_BYTE:
-    case TIMER_B_HIGH_BYTE: {
-      break;
+    case TIMER_A_HIGH_BYTE: {
+    case TIMER_B_HIGH_BYTE:
+      return c->t->treg->counter_hi[reg & 0x01];                           
     }
 
     case REAL_TIME_CLOCK_TENTH: {
@@ -429,18 +474,17 @@ uint8_t c6526_read(c6526_t* c, uint16_t addr) {
     } 
 
     case INTERRUPT_CONTROL_REGISTER: {
-      // An ICR read clears it contents.
-      uint8_t data = c->icr;
-      c->icr = 0;
-
-      return data;
+      return icr_read(c);
     } 
 
+    // FORCE LOAD 
+    // According to the 6526 Datasheet, bit 4 is always 0 when reading CRA/B.
+    // Because this is a STROBE input, therefore there is no data storage.
     case CONTROL_TIMER_A: {
-      break;
+      return (c->cr[A] & ~(LOAD_LATCH_INTO_TIMER_CRA));
     }
     case CONTROL_TIMER_B: {
-      break;
+      return (c->cr[B] & ~(LOAD_LATCH_INTO_TIMER_CRB));
     } 
     default: {
       break;
@@ -665,7 +709,8 @@ static inline void tick_timer_pip(c6526_t* c) {
     c->icr |= IRQ_SC;
   }
 
-
+  c->t->delay = ((c->t->delay & C6526_TIMER_DELAY_MASK) | c->t->feed ) << 1;
+  c->t->feed = 0;
 }
 
 c6526_t* c6526_init(void) {

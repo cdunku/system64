@@ -8,7 +8,8 @@
 typedef struct m6510_port_t m6510_port_t;
 
 static const uint8_t NF  = (1 << 7);
-static const uint8_t VF  = (1 << 6);
+static const uint8_t VF  = (1 << 6); 
+static const uint8_t UF  = (1 << 5); // UNUSED FLAG
 static const uint8_t BF  = (1 << 4);
 static const uint8_t DF  = (1 << 3);
 static const uint8_t IDF = (1 << 2);

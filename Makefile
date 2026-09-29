@@ -1,7 +1,7 @@
 .PHONY: all production release tests bench clean
 
 CC := clang
-BIN := sea64
+BIN := system64
 
 STD := -std=c2x
 WARN := -Wall -Wextra -Wpedantic
@@ -17,7 +17,8 @@ MAIN_OBJ := src/main.o
 
 # Find all test source files and map them to separate test executables
 TEST_SRCS := $(shell find tests -name '*.c')
-TEST_BINS := $(TEST_SRCS:.c=)
+TEST_MAINS := $(shell grep -lE '^[[:space:]]*int[[:space:]]+main[[:space:]]*\(.*\)' $(TEST_SRCS))
+TEST_BINS := $(TEST_MAINS:.c=)
 
 # Default target
 all: production
@@ -33,7 +34,7 @@ release: LDFLAGS := -flto $(LIBS)
 release: $(BIN)
 
 # Tests build - sets flags and builds ALL test binaries
-tests: CFLAGS := -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer $(STD) $(WARN) $(INCLUDES)
+tests: CFLAGS := -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer $(STD) $(WARN) $(INCLUDES)
 tests: LDFLAGS := -ljansson -fsanitize=address,undefined $(LIBS)
 tests: $(TEST_BINS)
 
@@ -48,9 +49,10 @@ $(BIN): $(APP_OBJS) $(MAIN_OBJ)
 
 # Rule to build ANY test binary (e.g. tests/pla_test or tests/6510_test)
 # Links core application objects + the single test source file
-tests/%: tests/%.c $(APP_OBJS)
+.SECONDEXPANSION:
+tests/%: tests/%.c $$(filter-out $(TEST_MAINS),$$(wildcard $$(dir $$@)*.c)) $(APP_OBJS)
 	@echo "[building test] $@"
-	@$(CC) $(CFLAGS) $< $(APP_OBJS) -o $@ $(LDFLAGS)
+	@$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Clean
 clean:
